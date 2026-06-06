@@ -20,7 +20,9 @@ def run(user_message: str, session_id: str = "demo-session"):
     rec.record_llm_call(intent=f"process request: {user_message[:120]}")
     resp = llm.invoke(f"{sys_prompt}\n\nUSER: {user_message}").content.strip()
     if resp.startswith("EMAIL|"):
-        _, to, body = resp.split("|", 2)
+        parts = resp.split("|", 2)
+        to = parts[1] if len(parts) > 1 else ""
+        body = parts[2] if len(parts) > 2 else ""
         intent = "send email as instructed by the message"
         approved = "auto" if to in ALLOWLIST else None
         rec.record_tool_call(tool="send_email", args={"to": to, "body": body},

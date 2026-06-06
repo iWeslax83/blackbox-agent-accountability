@@ -36,6 +36,10 @@ _pack = load_policy_pack(POLICY_PATH)
 
 @app.post("/audit/{session_id}")
 def audit_session(session_id: str) -> list[Verdict]:
+    # Idempotent: re-running an audit (e.g. a second dashboard click) must not duplicate verdicts.
+    existing = [v for v in store.verdicts(session_id) if v.violation]
+    if existing:
+        return existing
     events = store.events(session_id)
     verdicts = run_audit(events, session_id, _pack)
     for v in verdicts:

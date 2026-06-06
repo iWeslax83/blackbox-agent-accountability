@@ -39,7 +39,13 @@ def run_lens(rule: Rule, events: list[Event], session_id: str, llm=None) -> Verd
                              description=rule.description, detector_hint=rule.detector_hint,
                              log=_events_to_text(events))
     raw = llm.invoke(msg).content
-    data = json.loads(raw[raw.find("{"): raw.rfind("}") + 1])
+    try:
+        data = json.loads(raw[raw.find("{"): raw.rfind("}") + 1])
+    except (json.JSONDecodeError, ValueError):
+        # A misbehaving lens response must not crash the whole audit; fail safe to no-violation.
+        return Verdict(session_id=session_id, rule_id=rule.id, severity=rule.severity,
+                       violation=False, confidence=0.0, evidence_seqs=[],
+                       rationale="[lens parse error]", framework_ref=rule.framework_ref)
     return Verdict(session_id=session_id, rule_id=rule.id, severity=rule.severity,
                    violation=bool(data["violation"]), confidence=float(data["confidence"]),
                    evidence_seqs=data.get("evidence_seqs", []),
@@ -55,7 +61,10 @@ def consolidate(verdicts: list[Verdict]) -> list[Verdict]:
     for rule_id, vs in by_rule.items():
         flags = [v for v in vs if v.violation]
         confirmed = len(flags) >= 2 or any(v.confidence >= CONF_THRESHOLD for v in flags)
-        best = max(vs, key=lambda v: v.confidence)
+        # When confirmed, the merged rationale/confidence must come from a flagging lens,
+        # not a higher-confidence "no violation" lens.
+        best = max(flags, key=lambda v: v.confidence) if (confirmed and flags) \
+            else max(vs, key=lambda v: v.confidence)
         evidence = sorted({s for v in flags for s in v.evidence_seqs})
         out.append(Verdict(session_id=best.session_id, rule_id=rule_id,
                            severity=best.severity, violation=confirmed,
