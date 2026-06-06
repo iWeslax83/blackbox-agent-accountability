@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blackbox-agent-accountability"
+version = "0.1.0"
+description = "AI-agent accountability and compliance auditing tool"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Emir Sakarya" }]
+dependencies = [
+    "langgraph>=0.2",
+    "langchain-anthropic>=0.2",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/iWeslax83/blackbox-agent-accountability"
+Repository = "https://github.com/iWeslax83/blackbox-agent-accountability"
+
+[tool.setuptools.packages.find]
+include = ["blackbox*"]
+exclude = ["tests*"]
