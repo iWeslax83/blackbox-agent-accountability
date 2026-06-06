@@ -25,3 +25,27 @@ def list_verdicts(session_id: str | None = None) -> list[Verdict]:
 @app.get("/verify")
 def verify() -> dict:
     return {"chain_intact": store.verify_chain()}
+
+from fastapi.responses import HTMLResponse
+from .policy import load_policy_pack
+from .tribunal import audit as run_audit
+from .evidence import build_evidence_pack
+
+POLICY_PATH = os.environ.get("BLACKBOX_POLICY", "policies/eu_ai_act.yaml")
+_pack = load_policy_pack(POLICY_PATH)
+
+@app.post("/audit/{session_id}")
+def audit_session(session_id: str) -> list[Verdict]:
+    events = store.events(session_id)
+    verdicts = run_audit(events, session_id, _pack)
+    for v in verdicts:
+        store.add_verdict(v)
+    return verdicts
+
+@app.get("/evidence/{session_id}", response_class=HTMLResponse)
+def evidence(session_id: str) -> str:
+    events = store.events(session_id)
+    verdicts = store.verdicts(session_id)
+    pack = build_evidence_pack(session_id, events, verdicts,
+                               framework=_pack.framework, chain_intact=store.verify_chain())
+    return pack["html"]
