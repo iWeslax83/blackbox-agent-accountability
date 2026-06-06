@@ -1,0 +1,46 @@
+<!-- blackbox/ui/dashboard.html -->
+<!doctype html><meta charset=utf-8><title>BLACKBOX</title>
+<style>
+:root{--cream:#f4efe6;--ink:#1a1714;--accent:#b4451f}
+body{font-family:system-ui;background:var(--cream);color:var(--ink);margin:0;padding:1.5rem}
+h1{color:var(--accent);margin:0 0 1rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.card{background:#fff;border:1px solid #e3dccd;border-radius:10px;padding:1rem}
+.ev{font:13px/1.4 ui-monospace,monospace;padding:4px 6px;border-bottom:1px solid #eee}
+.flag{background:#fbe9e3;border-left:4px solid var(--accent);padding:8px;margin:6px 0;border-radius:6px}
+button{background:var(--accent);color:#fff;border:0;padding:8px 14px;border-radius:6px;cursor:pointer}
+.sev-critical{color:var(--accent);font-weight:700}.muted{color:#8a8275}
+input{padding:6px;border:1px solid #ccc;border-radius:6px}
+</style>
+<h1>BLACKBOX — Agent Accountability</h1>
+<p>Session <input id=sid value="demo-session">
+<button onclick=refresh()>Refresh</button>
+<button onclick=runAudit()>Run Tribunal Audit</button>
+<button onclick=openEvidence()>Export Evidence Pack</button>
+<span id=chain class=muted></span></p>
+<div class=grid>
+  <div class=card><h3>Live Action Log</h3><div id=feed></div></div>
+  <div class=card><h3>Flagged Incidents</h3><div id=flags></div></div>
+</div>
+<script>
+const API="http://localhost:8900";
+const sid=()=>document.getElementById("sid").value;
+async function refresh(){
+  const evs=await (await fetch(`${API}/events?session_id=${sid()}`)).json();
+  document.getElementById("feed").innerHTML=evs.map(e=>
+    `<div class=ev>#${e.seq} <b>${e.kind}</b> ${e.tool||""} `+
+    `<span class=muted>${(e.intent||"").slice(0,60)}</span> `+
+    `${e.args&&e.args.to?("&rarr; "+e.args.to):""}</div>`).join("")||"<p class=muted>no events</p>";
+  const vs=await (await fetch(`${API}/verdicts?session_id=${sid()}`)).json();
+  document.getElementById("flags").innerHTML=vs.filter(v=>v.violation).map(v=>
+    `<div class=flag><span class="sev-${v.severity}">${v.rule_id} [${v.severity}]</span> `+
+    `conf ${v.confidence.toFixed(2)}<br><span class=muted>${v.rationale}</span><br>`+
+    `<small>evidence #${v.evidence_seqs.join(", #")} &middot; ${v.framework_ref}</small></div>`
+  ).join("")||"<p class=muted>no violations</p>";
+  const c=await (await fetch(`${API}/verify`)).json();
+  document.getElementById("chain").textContent=c.chain_intact?"· chain intact":"· chain TAMPERED";
+}
+async function runAudit(){await fetch(`${API}/audit/${sid()}`,{method:"POST"});refresh();}
+function openEvidence(){window.open(`${API}/evidence/${sid()}`,"_blank");}
+refresh();setInterval(refresh,3000);
+</script>
