@@ -16,7 +16,9 @@ from .evidence import build_evidence_pack
 
 store = Store()
 app = FastAPI(title="BLACKBOX")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+_origins = [o for o in os.environ.get("FRONTEND_ORIGIN", "").split(",") if o] or ["*"]
+app.add_middleware(CORSMiddleware, allow_origins=_origins,
+                   allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
 configure_logging()
 
 POLICY_PATH = os.environ.get("BLACKBOX_POLICY", "policies/eu_ai_act.yaml")
