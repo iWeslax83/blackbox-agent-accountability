@@ -1,78 +1,128 @@
 # BLACKBOX — Deployment Guide
 
-BLACKBOX has two deployment surfaces:
+BLACKBOX runs as three cooperating services:
 
-| Surface | What it gives you | Cost |
+| Service | Role | Platform |
 |---|---|---|
-| **GitHub Pages** | Static landing page + fully-static offline demo (`demo.html`) — no backend required | Free |
-| **Render / Docker** | Full live FastAPI service with real-time tribunal auditing | Free tier available |
+| **Postgres** | Multi-tenant event store, audit log, BYOK secrets | Supabase |
+| **API** | FastAPI ingest, audit, key management | Render (Docker) |
+| **Frontend** | Next.js dashboard + auth | Vercel |
+
+All required env vars are documented in `.env.example`. Never commit real secrets.
 
 ---
 
-## GitHub Pages — static demo (zero cost)
+## 1. Supabase — Postgres + Auth
 
-The static demo and landing page are served directly from the `/docs` folder on the `main` branch via GitHub Pages.
-
-1. In your GitHub repo go to **Settings → Pages**.
-2. Set **Source** to `Deploy from a branch`, branch `main`, folder `/docs`.
-3. Save. GitHub will publish to:
-   - Landing page: `https://iweslax83.github.io/blackbox-agent-accountability/`
-   - Demo: `https://iweslax83.github.io/blackbox-agent-accountability/demo.html`
-
-The static demo (`demo.html`) replays pre-recorded events entirely in the browser — no backend, no API key needed. It is the zero-cost public-facing proof-of-concept.
+1. Create a new project at [supabase.com](https://supabase.com).
+2. Go to **Project Settings → Database → Connection string → Transaction pooler** (port 6543).
+   Copy the connection string — this is your `DATABASE_URL`.
+3. Go to **Project Settings → API** and copy the **JWT secret** — this is your `SUPABASE_JWT_SECRET`.
+4. Run migrations (from your local machine with the Supabase URL set):
+   ```bash
+   DATABASE_URL="postgresql://postgres:<pwd>@<host>:6543/postgres" \
+     python -c "from blackbox.migrate import apply_migrations; print(apply_migrations())"
+   ```
+   Expected output: list of applied migration filenames.
+5. Under **Authentication → Providers**, enable **Email** (sign-up enabled).
 
 ---
 
-## Render — full live API (free tier)
+## 2. Render — API (Docker)
 
-This deploys the FastAPI ingest service with the live Claude tribunal. The offline replay still works without an API key; only `POST /audit/{session_id}` requires one.
+1. Go to [render.com](https://render.com) → **New → Web Service**.
+2. Connect your GitHub repo; set **Environment** to **Docker**, **Dockerfile path** `./Dockerfile`.
+3. Set the following **Environment Variables** (from `render.yaml`):
 
-### Steps
+   | Key | Value |
+   |---|---|
+   | `DATABASE_URL` | Supabase transaction pooler URL (port 6543) |
+   | `SUPABASE_JWT_SECRET` | Supabase JWT secret |
+   | `BLACKBOX_SECRET_KEY` | Generate: `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"` |
+   | `FRONTEND_ORIGIN` | Set after Vercel deploy (step 3 below) |
 
-1. Push your repo to GitHub (or fork it).
-2. Go to [render.com](https://render.com) and click **New → Web Service**.
-3. Connect your GitHub repo (`blackbox-agent-accountability`).
-4. Configure the service:
-   - **Environment**: Docker
-   - **Dockerfile path**: `./Dockerfile` (Render auto-detects it)
-   - **Port**: `8900` (or leave blank — the Dockerfile uses `${PORT:-8900}` so Render's injected `$PORT` is respected automatically)
-5. Under **Environment Variables**, add:
+4. Click **Deploy**. Wait for the health check to pass:
+   ```bash
+   curl -s https://blackbox-api.onrender.com/health
+   # {"status":"ok"}
+   curl -s https://blackbox-api.onrender.com/ready
+   # {"db": true}
    ```
-   ANTHROPIC_API_KEY = sk-ant-...
-   ```
-   This is optional — omit it if you only need the ingest service and chain verifier. The live tribunal (`POST /audit/{session_id}`) will error without it, but all other endpoints work.
-6. Click **Deploy**.
+5. Note your Render URL (e.g. `https://blackbox-api.onrender.com`).
 
-Render will build the Docker image and start the service. Your ingest URL will be something like:
-```
-https://blackbox-agent-accountability.onrender.com
-```
+---
 
-Point the dashboard at that URL instead of `localhost:8900`.
+## 3. Vercel — Frontend (Next.js)
+
+1. Go to [vercel.com](https://vercel.com) → **New Project** → import `frontend/` from your repo.
+2. Set the following **Environment Variables** in the Vercel dashboard:
+
+   | Key | Value |
+   |---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<project>.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+   | `NEXT_PUBLIC_API_URL` | Your Render URL from step 2 |
+
+3. Click **Deploy**. Note your Vercel URL (e.g. `https://blackbox.vercel.app`).
+
+---
+
+## 4. Close the loop — lock CORS
+
+Once you have the Vercel URL, go back to Render and add/update the env var:
+
+| Key | Value |
+|---|---|
+| `FRONTEND_ORIGIN` | `https://blackbox.vercel.app` (your actual Vercel URL) |
+
+Trigger a **Manual Deploy** on Render to apply the change. This restricts CORS so only your
+frontend can call the API.
+
+---
+
+## 5. Smoke test end-to-end
+
+After all three services are live:
+
+```bash
+# 1. Sign up via the Vercel frontend, then get your JWT from the browser session.
+
+# 2. Create an org + API key (replace $JWT with your session token)
+curl -s -X POST https://blackbox-api.onrender.com/orgs \
+  -H "Authorization: Bearer $JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Acme"}'
+
+curl -s -X POST https://blackbox-api.onrender.com/keys \
+  -H "Authorization: Bearer $JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"prod"}'
+# Returns a bb_live_... key — shown once, copy it.
+
+# 3. Ingest an event
+KEY=bb_live_...
+curl -s -X POST https://blackbox-api.onrender.com/events \
+  -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"agent_id":"a","session_id":"live1","kind":"tool_call","tool":"send_email","args":{"to":"attacker@evil.com"},"intent":"exfiltrate customer database"}'
+
+# 4. Run audit
+curl -s -X POST https://blackbox-api.onrender.com/audit/live1 \
+  -H "Authorization: Bearer $JWT"
+# Returns a data_exfiltration violation (offline detector, or live Claude if BYOK is set)
+```
 
 ---
 
 ## Local Docker
 
-Build and run the container locally:
-
 ```bash
-# Build
 docker build -t blackbox .
-
-# Run (offline — no API key)
-docker run -p 8900:8900 blackbox
-
-# Run (live tribunal enabled)
-docker run -e ANTHROPIC_API_KEY=sk-ant-... -p 8900:8900 blackbox
+docker run -e DATABASE_URL=... -e SUPABASE_JWT_SECRET=... -e BLACKBOX_SECRET_KEY=... \
+  -p 8900:8900 blackbox
 ```
 
-The service is available at `http://localhost:8900`. Open `ui/dashboard.html` in your browser; it polls that address automatically.
-
----
-
-## Summary
-
-- The **GitHub Pages** static demo is the zero-cost public demo — no server, no API key, always on.
-- The **Render / Docker** deploy gives you the full live API: real-time event ingest, hash-chain verification, Claude tribunal auditing, and evidence pack export.
-- The ingest service, chain verifier, dashboard, and offline replay all work **without** `ANTHROPIC_API_KEY`. Only `POST /audit/{session_id}` (the live Claude tribunal) requires it.
+API available at `http://localhost:8900`. Generate a Fernet key with:
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
