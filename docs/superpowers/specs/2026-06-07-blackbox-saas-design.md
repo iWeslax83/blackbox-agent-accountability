@@ -97,7 +97,9 @@ Migrations are SQL files checked into the repo (`migrations/`), applied to Supab
 
 - `POST /events` — API-key auth; append event to the caller's org chain.
 - `GET /events?session_id=` — JWT auth; list the org's events.
-- `POST /audit/{session_id}` — JWT auth; run tribunal (BYOK if present, else offline); idempotent.
+- `POST /audit/{session_id}` — JWT auth; run tribunal (BYOK if present, else offline).
+  Idempotent **and** concurrency-safe: serialized by a DB-backed execution lock (see §9) so two
+  simultaneous clicks can never both run the tribunal and double-spend the customer's BYOK key.
 - `GET /verdicts?session_id=` — JWT auth.
 - `GET /verify?session_id=` — JWT auth; chain integrity for the org's session.
 - `GET /evidence/{session_id}` — JWT auth; HTML/JSON evidence pack.
@@ -122,6 +124,42 @@ JWT; uses `@supabase/supabase-js` for auth. Deployed to Vercel. Warm-paper theme
   tenancy/auth/key/encryption tests) on every push before deploy.
 - Reproducible deploy: `render.yaml`, `vercel.json`, updated `DEPLOY.md`, `.env.example`.
 
+### 9.1 Security & reliability gaps to close explicitly
+
+These four are mandatory, not optional polish:
+
+1. **Service-role must not silently defeat RLS.** The API authenticates with the Supabase
+   service-role key, which **bypasses RLS entirely** — so RLS is *not* a backstop for the
+   API's own queries. App-layer `org_id` scoping is therefore the **sole** primary enforcement
+   and every data-access function MUST take `org_id` as a required argument (no "fetch by id"
+   without org). The store layer exposes **no** un-scoped query path; a single audited
+   `_scoped()` helper is the only way rows are read/written, so a missing filter is impossible
+   by construction (and unit-tested). RLS policies are still defined and enabled to protect the
+   anon/public PostgREST surface (which we do not expose), and CI asserts no store method issues
+   a query lacking an `org_id` predicate.
+2. **DB-backed execution lock on `/audit`.** The current read-then-write idempotency check is
+   racy: two concurrent calls both see "no verdicts yet", both run the tribunal, both spend the
+   customer's Anthropic credits. Replace with a Postgres advisory lock
+   (`pg_try_advisory_xact_lock(hashtext(org_id||session_id))`) **or** an `audit_runs` row with a
+   `UNIQUE(org_id, session_id)` constraint claimed via `INSERT … ON CONFLICT DO NOTHING` and a
+   status state machine (`pending`/`done`/`failed`). The loser of the race returns the existing
+   result (or waits) instead of launching a second tribunal. Covered by a concurrency test.
+3. **Bounded DB connection pool sized for the free tier.** Supabase free-tier Postgres has a low
+   direct-connection ceiling; the LangGraph tribunal fans out one lens node per rule concurrently.
+   Connect through the **Supabase transaction pooler (pgBouncer, port 6543)** and cap the
+   SQLAlchemy/asyncpg pool (`pool_size=5`, `max_overflow=2`, `pool_timeout`, `pool_pre_ping=True`)
+   so a fan-out can never open more DB connections than the tier allows. Crucially, the tribunal's
+   concurrent lens agents do **LLM** work, not DB work — DB reads happen once up front and verdict
+   writes happen once after consolidation, so fan-out width is decoupled from pool size. Pool
+   limits are config constants with documented rationale, not magic numbers.
+4. **Decrypted secrets can never reach logs.** A custom `logging.Filter` (installed on the root
+   logger and any Sentry/error handler) redacts anything matching the Anthropic key shape
+   (`sk-ant-…`) and the `bb_live_…` API-key shape from every log record and exception payload.
+   The decrypted BYOK key lives only in a local variable for the duration of one audit, is never
+   placed on a model/dataclass that gets serialized, and is never passed to `logger.*`. A test
+   forces a tribunal runtime failure with a known key in scope and asserts the key string appears
+   in **no** emitted log line.
+
 ## 10. Testing strategy (strict TDD)
 
 Test-first for every security-critical boundary:
@@ -132,17 +170,28 @@ Test-first for every security-critical boundary:
   plaintext never appears in DB or logs.
 - **JWT auth:** valid token → access; tampered/expired/absent → 401; correct `org_id` derivation.
 - **Chain per tenant:** hash chain remains valid and tamper-evident within an org's session.
+- **No un-scoped queries (§9.1.1):** every store method requires `org_id`; a static/CI check
+  fails if any query path omits the `org_id` predicate.
+- **Audit concurrency (§9.1.2):** two simultaneous `/audit` calls for the same session run the
+  tribunal exactly once; the second returns the first's result, BYOK key spent once.
+- **Connection pool bound (§9.1.3):** a tribunal fan-out under the configured pool never exceeds
+  the connection cap (asserted against a pool with a tight limit).
+- **Secret never logged (§9.1.4):** a forced tribunal failure with a live key in scope emits no
+  log line containing the key; the redaction filter masks `sk-ant-…` and `bb_live_…`.
 - Existing unit/integration tests continue to pass against Postgres.
 
 ## 11. Build order (becomes the implementation plan)
 
-1. Postgres store + SQL migrations (swap SQLite, preserve hash-chain) — TDD.
-2. Org/tenancy model + membership.
+1. Postgres store + SQL migrations (swap SQLite, preserve hash-chain) — TDD. Includes the
+   single audited `org_id`-scoped query helper and the no-un-scoped-query guard (§9.1.1),
+   plus pooler config + bounded pool (§9.1.3).
+2. Org/tenancy model + membership + RLS policies (defense-in-depth for the unexposed PostgREST surface).
 3. Supabase JWT verification middleware on the API.
 4. API-key issue/verify/revoke.
-5. BYOK encryption + wire into tribunal.
+5. BYOK encryption + wire into tribunal, with the secret-redaction log filter (§9.1.4) and the
+   DB-backed `/audit` execution lock (§9.1.2).
 6. Next.js dashboard (auth, sessions, keys, settings) + port landing.
-7. Hardening: health/ready, CORS lockdown, rate-limit, structured logging.
+7. Hardening: health/ready, CORS lockdown, rate-limit, structured logging + redaction filter wired globally.
 8. CI with Postgres service + `render.yaml`/`vercel.json` + deploy docs.
 9. End-to-end live verification (in-session if creds supplied).
 
@@ -153,10 +202,15 @@ single org owner+members, paid tiers, on-prem. These are explicitly deferred.
 
 ## 13. Risks
 
-- **Cross-tenant leakage** — mitigated by app-layer `org_id` scoping on every query + RLS +
-  the tenancy isolation test as a gate.
-- **BYOK key exposure** — mitigated by AES-GCM encryption at rest, in-memory-only decryption,
-  no logging of secrets.
+- **Cross-tenant leakage** — service-role bypasses RLS, so app-layer `org_id` scoping via the
+  single audited query helper is the real boundary (§9.1.1); RLS is defense-in-depth for the
+  unexposed PostgREST surface; the tenancy isolation test gates merges.
+- **BYOK key exposure** — AES-GCM encryption at rest, in-memory-only decryption, and the
+  `sk-ant-…`/`bb_live_…` redaction log filter (§9.1.4) so secrets never reach logs even on failure.
+- **Double-spend of BYOK credits** — DB-backed execution lock serializes concurrent `/audit`
+  calls (§9.1.2).
+- **Free-tier DB connection exhaustion** — transaction pooler + bounded pool decoupled from
+  tribunal fan-out width (§9.1.3).
 - **Free-tier cold starts (Render)** — acceptable for a portfolio/waitlist product; documented.
 - **Supabase/Render/Vercel account + secret provisioning** requires the user's own accounts;
   the API cannot create these. Live wire-up is contingent on supplied credentials.
