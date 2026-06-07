@@ -9,12 +9,15 @@ from .auth import current_org, verify_jwt
 from .apikeys import org_from_api_key, create_api_key, list_api_keys, revoke_api_key
 from .orgs import create_org, org_for_user
 from .policy import load_policy_pack
-from .tribunal import audit as run_audit
+from .byok import set_byok, get_byok, clear_byok, has_byok
+from .auditlock import audited_run
+from .logging_filter import install_redaction
 from .evidence import build_evidence_pack
 
 store = Store()
 app = FastAPI(title="BLACKBOX")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+install_redaction()
 
 POLICY_PATH = os.environ.get("BLACKBOX_POLICY", "policies/eu_ai_act.yaml")
 _pack = load_policy_pack(POLICY_PATH)
@@ -39,14 +42,22 @@ def verify(session_id: str | None = None, org_id: str = Depends(current_org)) ->
 
 @app.post("/audit/{session_id}")
 def audit_session(session_id: str, org_id: str = Depends(current_org)) -> list[Verdict]:
-    existing = [v for v in store.verdicts(org_id, session_id) if v.violation]
-    if existing:
-        return existing
-    events = store.events(org_id, session_id)
-    verdicts = run_audit(events, session_id, _pack)
-    for v in verdicts:
-        store.add_verdict(org_id, v)
-    return verdicts
+    api_key = get_byok(org_id, "anthropic")   # None -> offline deterministic audit
+    return audited_run(store, org_id, session_id, _pack, api_key)
+
+@app.put("/byok")
+def put_byok(key: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:
+    set_byok(org_id, "anthropic", key)
+    return {"configured": True}
+
+@app.get("/byok")
+def get_byok_status(org_id: str = Depends(current_org)) -> dict:
+    return {"configured": has_byok(org_id, "anthropic")}   # never returns the key itself
+
+@app.delete("/byok")
+def delete_byok(org_id: str = Depends(current_org)) -> dict:
+    clear_byok(org_id, "anthropic")
+    return {"configured": False}
 
 @app.get("/evidence/{session_id}", response_class=HTMLResponse)
 def evidence(session_id: str, org_id: str = Depends(current_org)) -> str:

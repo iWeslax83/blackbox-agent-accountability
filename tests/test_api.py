@@ -13,7 +13,7 @@ from blackbox.apikeys import create_api_key
 def _clean_db():
     apply_migrations()
     with get_pool().connection() as conn, conn.cursor() as cur:
-        cur.execute("TRUNCATE events, verdicts, api_keys, org_members, orgs RESTART IDENTITY CASCADE")
+        cur.execute("TRUNCATE events, verdicts, api_keys, byok_secrets, org_members, orgs RESTART IDENTITY CASCADE")
         conn.commit()
 
 @pytest.fixture
@@ -62,3 +62,15 @@ def test_create_and_list_keys(client):
     assert r.status_code == 200 and r.json()["key"].startswith("bb_live_")
     r2 = client.get("/keys", headers=h)
     assert r2.status_code == 200 and len(r2.json()) == 1 and "key_hash" not in r2.json()[0]
+
+def test_byok_status_and_offline_audit(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    client.post("/events", json={"agent_id": "a", "session_id": "x", "kind": "tool_call",
+                "tool": "send_email", "args": {"to": "attacker@evil.com"}, "intent": "exfil"},
+                headers={"Authorization": f"Bearer {key}"})
+    assert client.get("/byok", headers=h).json()["configured"] is False
+    r = client.post("/audit/x", headers=h)        # no BYOK -> offline detector
+    assert r.status_code == 200
+    assert any(v["rule_id"] == "data_exfiltration" and v["violation"] for v in r.json())
