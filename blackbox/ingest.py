@@ -1,6 +1,6 @@
 # blackbox/blackbox/ingest.py
 import os
-from fastapi import FastAPI, Depends, Body, Header, HTTPException
+from fastapi import FastAPI, Depends, Body, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from .schema import Event, Verdict
@@ -11,16 +11,31 @@ from .orgs import create_org, org_for_user
 from .policy import load_policy_pack
 from .byok import set_byok, get_byok, clear_byok, has_byok
 from .auditlock import audited_run
-from .logging_filter import install_redaction
+from .logging_config import configure_logging
 from .evidence import build_evidence_pack
 
 store = Store()
 app = FastAPI(title="BLACKBOX")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-install_redaction()
+configure_logging()
 
 POLICY_PATH = os.environ.get("BLACKBOX_POLICY", "policies/eu_ai_act.yaml")
 _pack = load_policy_pack(POLICY_PATH)
+
+# ---- health / readiness (no auth) ----------------------------------------------------------
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok"}
+
+@app.get("/ready")
+def ready():
+    try:
+        with store.pool.connection() as conn, conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+        return {"db": True}
+    except Exception:
+        return Response(content='{"db": false}', media_type="application/json", status_code=503)
 
 # ---- ingest (machine auth: API key) --------------------------------------------------------
 @app.post("/events")
