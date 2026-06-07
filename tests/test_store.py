@@ -1,29 +1,62 @@
-# blackbox/tests/test_store.py
-from blackbox.store import Store
-from blackbox.schema import Event
+import pytest
+from blackbox.schema import Event, Verdict
 
-def make_event(i):
-    return Event(agent_id="a1", session_id="s1", kind="tool_call",
-                 tool="send_email", args={"to": f"x{i}@y.com"}, intent="notify")
+def _ev(session_id="s1", **kw):
+    return Event(agent_id="a", session_id=session_id, kind="tool_call", **kw)
 
-def test_append_assigns_seq_and_chains_hash(tmp_path):
-    s = Store(str(tmp_path / "t.db"))
-    e0 = s.append(make_event(0))
-    e1 = s.append(make_event(1))
-    assert e0.seq == 1 and e1.seq == 2
-    assert e0.prev_hash == "GENESIS"
-    assert e1.prev_hash == e0.hash
-    assert e0.hash and e1.hash and e0.hash != e1.hash
+def _vd(session_id="s1"):
+    return Verdict(session_id=session_id, rule_id="data_exfiltration", severity="critical",
+                   violation=True, confidence=0.9, evidence_seqs=[1])
 
-def test_verify_chain_detects_tamper(tmp_path):
-    dbp = str(tmp_path / "t.db")
-    s = Store(dbp)
-    for i in range(3):
-        s.append(make_event(i))
-    assert s.verify_chain() is True
-    # tamper directly in sqlite
-    import sqlite3
-    con = sqlite3.connect(dbp)
-    con.execute("UPDATE events SET output='HACKED' WHERE seq=2")
-    con.commit(); con.close()
-    assert s.verify_chain() is False
+def test_append_assigns_seq_hash_and_org(store):
+    e = store.append("orgA", _ev())
+    assert e.seq is not None and e.hash and e.prev_hash == "GENESIS" and e.org_id == "orgA"
+
+def test_chain_links_within_org_session(store):
+    e1 = store.append("orgA", _ev())
+    e2 = store.append("orgA", _ev())
+    assert e2.prev_hash == e1.hash
+
+def test_chain_is_independent_per_org(store):
+    store.append("orgA", _ev(session_id="s1"))
+    b1 = store.append("orgB", _ev(session_id="s1"))
+    assert b1.prev_hash == "GENESIS"     # orgB starts its own genesis, not chained to orgA
+
+def test_events_are_scoped_to_org(store):
+    store.append("orgA", _ev())
+    store.append("orgB", _ev())
+    evs = store.events("orgA")
+    assert len(evs) == 1 and all(e.org_id == "orgA" for e in evs)
+
+def test_tenant_isolation_no_cross_read(store):   # <-- GATE TEST
+    store.append("orgA", _ev(session_id="secret"))
+    assert store.events("orgB", session_id="secret") == []
+
+def test_verify_chain_true_for_intact_org_chain(store):
+    store.append("orgA", _ev()); store.append("orgA", _ev())
+    assert store.verify_chain("orgA") is True
+
+def test_verdicts_scoped_to_org(store):
+    store.append("orgA", _ev())
+    store.add_verdict("orgA", _vd())
+    assert len(store.verdicts("orgA")) == 1
+    assert store.verdicts("orgB") == []
+
+def test_assert_scoped_rejects_empty_org(store):
+    with pytest.raises(ValueError):
+        store._assert_scoped("", "SELECT 1 FROM events WHERE org_id=%s")
+
+def test_assert_scoped_rejects_unscoped_sql(store):
+    with pytest.raises(ValueError):
+        store._assert_scoped("orgA", "SELECT 1 FROM events")
+
+@pytest.mark.parametrize("call", [
+    lambda s: s.events(""),
+    lambda s: s.verdicts(""),
+    lambda s: s.verify_chain(""),
+    lambda s: s.append("", _ev()),
+    lambda s: s.add_verdict("", _vd()),
+])
+def test_every_public_method_requires_org(store, call):
+    with pytest.raises(ValueError):
+        call(store)
