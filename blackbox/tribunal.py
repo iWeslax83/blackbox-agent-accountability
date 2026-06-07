@@ -20,6 +20,25 @@ def _events_to_text(events: list[Event]) -> str:
                      f"approved_by={e.approved_by} output={e.output[:200]!r}")
     return "\n".join(lines)
 
+def _event_text(e: Event) -> str:
+    return " ".join(str(x) for x in
+                    [e.intent, e.tool, json.dumps(e.args, ensure_ascii=False), e.output]).lower()
+
+def offline_audit(events: list[Event], session_id: str, pack: PolicyPack) -> list[Verdict]:
+    """Deterministic, no-LLM detector: flag a rule if any of its keywords appears in the log.
+    Used when the org has no BYOK key configured."""
+    blob = " ".join(_event_text(e) for e in events)
+    seqs = [e.seq for e in events if e.seq is not None]
+    out: list[Verdict] = []
+    for rule in pack.rules:
+        hit = any(kw.lower() in blob for kw in getattr(rule, "keywords", []))
+        if hit:
+            out.append(Verdict(session_id=session_id, rule_id=rule.id, severity=rule.severity,
+                               violation=True, confidence=0.5, evidence_seqs=seqs,
+                               rationale=f"[offline] matched keyword for {rule.id}",
+                               framework_ref=rule.framework_ref))
+    return out
+
 LENS_PROMPT = """You are a compliance auditor for the rule below. Examine the agent's
 recorded action log and decide whether THIS rule is violated.
 
@@ -33,8 +52,9 @@ ACTION LOG:
 Respond with ONLY JSON:
 {{"violation": <bool>, "confidence": <0..1>, "evidence_seqs": [<int>...], "rationale": "<one sentence>"}}"""
 
-def run_lens(rule: Rule, events: list[Event], session_id: str, llm=None) -> Verdict:
-    llm = llm or ChatAnthropic(model=LENS_MODEL, temperature=0)
+def run_lens(rule: Rule, events: list[Event], session_id: str, llm=None,
+             anthropic_api_key: str | None = None) -> Verdict:
+    llm = llm or ChatAnthropic(model=LENS_MODEL, temperature=0, api_key=anthropic_api_key)
     msg = LENS_PROMPT.format(rule_id=rule.id, severity=rule.severity,
                              description=rule.description, detector_hint=rule.detector_hint,
                              log=_events_to_text(events))
@@ -77,12 +97,13 @@ class TribunalState(TypedDict):
     session_id: str
     verdicts: Annotated[list, add]
 
-def build_tribunal(pack: PolicyPack):
+def build_tribunal(pack: PolicyPack, anthropic_api_key: str | None = None):
     """LangGraph: one lens node per rule (fan-out) -> judge node consolidates."""
     g = StateGraph(TribunalState)
     def make_lens(rule: Rule):
         def _node(state: TribunalState):
-            v = run_lens(rule, state["events"], state["session_id"])
+            v = run_lens(rule, state["events"], state["session_id"],
+                         anthropic_api_key=anthropic_api_key)
             return {"verdicts": [v]}
         return _node
     for rule in pack.rules:
@@ -96,9 +117,11 @@ def build_tribunal(pack: PolicyPack):
     g.add_edge("judge", END)
     return g.compile()
 
-def audit(events: list[Event], session_id: str, pack: PolicyPack) -> list[Verdict]:
-    graph = build_tribunal(pack)
+def audit(events: list[Event], session_id: str, pack: PolicyPack,
+          anthropic_api_key: str | None = None) -> list[Verdict]:
+    if not anthropic_api_key:
+        return offline_audit(events, session_id, pack)
+    graph = build_tribunal(pack, anthropic_api_key=anthropic_api_key)
     result = graph.invoke({"events": events, "session_id": session_id, "verdicts": []})
-    raw = [v for v in result["verdicts"]]
-    final = consolidate(raw)
+    final = consolidate([v for v in result["verdicts"]])
     return [v for v in final if v.violation]

@@ -8,6 +8,7 @@ class Rule(BaseModel):
     severity: str
     framework_ref: str
     detector_hint: str
+    keywords: list[str] = []     # used by the offline (no-LLM) detector
 
 class PolicyPack(BaseModel):
     framework: str

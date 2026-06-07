@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: blackbox-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL          # Supabase transaction pooler URL (port 6543)
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: BLACKBOX_SECRET_KEY   # Fernet key: python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"
+        sync: false
+      - key: FRONTEND_ORIGIN       # https://<your-app>.vercel.app
+        sync: false

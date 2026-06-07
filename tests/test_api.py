@@ -1,110 +1,76 @@
-# tests/test_api.py
-"""Integration tests for the FastAPI ingest app.
-No LLM calls — the /audit endpoint is intentionally NOT tested here.
-"""
-import os
-import sys
-import pathlib
-import pytest
+import os, time
+os.environ.setdefault("DATABASE_URL",
+    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/blackbox_test"))
+os.environ.setdefault("SUPABASE_JWT_SECRET", "test-secret")
+import jwt, pytest
 from fastapi.testclient import TestClient
+from blackbox.migrate import apply_migrations
+from blackbox.db import get_pool
+from blackbox.orgs import create_org
+from blackbox.apikeys import create_api_key
 
-# Absolute path to the policy file so the import works regardless of CWD.
-_POLICY_PATH = str(pathlib.Path(__file__).parent.parent / "policies" / "eu_ai_act.yaml")
+@pytest.fixture(autouse=True)
+def _clean_db():
+    apply_migrations()
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("TRUNCATE events, verdicts, api_keys, byok_secrets, org_members, orgs RESTART IDENTITY CASCADE")
+        conn.commit()
 
+@pytest.fixture
+def client():
+    from blackbox.ingest import app
+    return TestClient(app)
 
-def _purge_blackbox():
-    """Remove all cached blackbox modules so a fresh import re-runs module-level code."""
-    for key in list(sys.modules.keys()):
-        if key.startswith("blackbox"):
-            del sys.modules[key]
+def _jwt(user_id):
+    now = int(time.time())
+    return jwt.encode({"sub": user_id, "aud": "authenticated", "iat": now, "exp": now + 3600},
+                      "test-secret", algorithm="HS256")
 
+def _event(session_id="s1"):
+    return {"agent_id": "a", "session_id": session_id, "kind": "tool_call",
+            "tool": "send_email", "args": {"to": "x@y.com"}, "intent": "t"}
 
-@pytest.fixture()
-def client(tmp_path, monkeypatch):
-    monkeypatch.setenv("BLACKBOX_DB", str(tmp_path / "api.db"))
-    monkeypatch.setenv("BLACKBOX_POLICY", _POLICY_PATH)
-    _purge_blackbox()
-    import blackbox.ingest as ingest
-    yield TestClient(ingest.app)
-    # Clean up after each test so next fixture call gets a fresh import
-    _purge_blackbox()
+def test_events_require_api_key(client):
+    assert client.post("/events", json=_event()).status_code == 401
 
-
-def _event(tool="send_email", to="a@b.com"):
-    return {
-        "agent_id": "t",
-        "session_id": "s1",
-        "kind": "tool_call",
-        "tool": tool,
-        "args": {"to": to},
-        "intent": "notify",
-    }
-
-
-def test_post_and_list_events(client):
-    r = client.post("/events", json=_event())
+def test_ingest_with_key_then_read_with_jwt(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    r = client.post("/events", json=_event(), headers={"Authorization": f"Bearer {key}"})
     assert r.status_code == 200
-    body = r.json()
-    assert body["seq"] == 1
-    assert body["hash"]
+    r2 = client.get("/events", params={"session_id": "s1"},
+                    headers={"Authorization": f"Bearer {_jwt('u1')}"})
+    assert r2.status_code == 200 and len(r2.json()) == 1
 
-    r2 = client.get("/events", params={"session_id": "s1"})
-    assert r2.status_code == 200
-    assert len(r2.json()) == 1
+def test_cross_tenant_read_is_empty(client):
+    org_a = create_org("A", "ua"); create_org("B", "ub")
+    key_a = create_api_key(org_a, "ci")
+    client.post("/events", json=_event("secret"), headers={"Authorization": f"Bearer {key_a}"})
+    # user B reads — must NOT see org A's event
+    r = client.get("/events", params={"session_id": "secret"},
+                   headers={"Authorization": f"Bearer {_jwt('ub')}"})
+    assert r.status_code == 200 and r.json() == []
 
+def test_dashboard_endpoints_reject_anonymous(client):
+    for path in ["/events", "/verdicts", "/verify"]:
+        assert client.get(path).status_code == 401
 
-def test_verify_chain_via_api(client):
-    client.post("/events", json=_event())
-    client.post("/events", json=_event(to="c@d.com"))
-    r = client.get("/verify")
+def test_create_and_list_keys(client):
+    create_org("Acme", "u1")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    r = client.post("/keys", json={"name": "prod"}, headers=h)
+    assert r.status_code == 200 and r.json()["key"].startswith("bb_live_")
+    r2 = client.get("/keys", headers=h)
+    assert r2.status_code == 200 and len(r2.json()) == 1 and "key_hash" not in r2.json()[0]
+
+def test_byok_status_and_offline_audit(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    client.post("/events", json={"agent_id": "a", "session_id": "x", "kind": "tool_call",
+                "tool": "send_email", "args": {"to": "attacker@evil.com"}, "intent": "exfil"},
+                headers={"Authorization": f"Bearer {key}"})
+    assert client.get("/byok", headers=h).json()["configured"] is False
+    r = client.post("/audit/x", headers=h)        # no BYOK -> offline detector
     assert r.status_code == 200
-    assert r.json() == {"chain_intact": True}
-
-
-def test_evidence_endpoint_renders(client):
-    client.post("/events", json=_event(to="evil@x.com"))
-
-    # Seed a verdict directly into the store the app uses (same module import).
-    import blackbox.ingest as ingest
-    from blackbox.schema import Verdict
-
-    ingest.store.add_verdict(
-        Verdict(
-            session_id="s1",
-            rule_id="data_exfiltration",
-            severity="critical",
-            violation=True,
-            confidence=0.9,
-            evidence_seqs=[1],
-            rationale="ext email",
-            framework_ref="Art.12",
-        )
-    )
-
-    r = client.get("/evidence/s1")
-    assert r.status_code == 200
-    assert "Compliance Evidence Pack" in r.text
-    assert "data_exfiltration" in r.text
-
-
-def test_verdicts_endpoint(client):
-    import blackbox.ingest as ingest
-    from blackbox.schema import Verdict
-
-    ingest.store.add_verdict(
-        Verdict(
-            session_id="s1",
-            rule_id="pii_mishandling",
-            severity="high",
-            violation=True,
-            confidence=0.8,
-            evidence_seqs=[1],
-            rationale="raw PII",
-            framework_ref="Art.10",
-        )
-    )
-
-    r = client.get("/verdicts", params={"session_id": "s1"})
-    assert r.status_code == 200
-    data = r.json()
-    assert any(v["rule_id"] == "pii_mishandling" for v in data)
+    assert any(v["rule_id"] == "data_exfiltration" and v["violation"] for v in r.json())
