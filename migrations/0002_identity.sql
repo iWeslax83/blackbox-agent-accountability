@@ -1,10 +1,20 @@
 -- 0002: orgs, membership, API keys, and RLS (defense-in-depth)
 
 -- Stub auth schema + uid() so RLS policy bodies parse on local Postgres.
--- On Supabase the real auth.uid() function exists; on local test DB this stub is used instead.
+-- CRITICAL: only create the stub if auth.uid() does NOT already exist, so we NEVER overwrite
+-- Supabase's real auth.uid() (doing so would silently break RLS by treating every caller as
+-- anonymous). On Supabase this block is a no-op; on the local test DB it installs an inert stub.
 -- The policies are never exercised by tests (we connect as superuser which bypasses RLS).
 CREATE SCHEMA IF NOT EXISTS auth;
-CREATE OR REPLACE FUNCTION auth.uid() RETURNS text AS $$ SELECT NULL::text $$ LANGUAGE sql STABLE;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'auth' AND p.proname = 'uid'
+  ) THEN
+    CREATE FUNCTION auth.uid() RETURNS text AS $f$ SELECT NULL::text $f$ LANGUAGE sql STABLE;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS orgs (
     id            TEXT PRIMARY KEY,
