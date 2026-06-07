@@ -16,6 +16,6 @@ def _migrate():
 def store():
     s = Store()
     with s.pool.connection() as conn, conn.cursor() as cur:
-        cur.execute("TRUNCATE events, verdicts RESTART IDENTITY")
+        cur.execute("TRUNCATE events, verdicts, api_keys, org_members, orgs RESTART IDENTITY CASCADE")
         conn.commit()
     return s
