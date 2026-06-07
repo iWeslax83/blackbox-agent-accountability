@@ -24,9 +24,11 @@ class Event(BaseModel):
     seq: Optional[int] = None
     prev_hash: Optional[str] = None
     hash: Optional[str] = None
+    org_id: Optional[str] = None       # tenant; assigned by the store on persist
 
 class Verdict(BaseModel):
     session_id: str
+    org_id: Optional[str] = None       # tenant; assigned by the store on persist
     rule_id: str
     severity: Literal["low", "medium", "high", "critical"]
     violation: bool
