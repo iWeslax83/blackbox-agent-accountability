@@ -3,6 +3,9 @@ import os
 from fastapi import FastAPI, Depends, Body, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from .schema import Event, Verdict
 from .store import Store
 from .auth import current_org, verify_jwt
@@ -20,6 +23,13 @@ _origins = [o for o in os.environ.get("FRONTEND_ORIGIN", "").split(",") if o] or
 app.add_middleware(CORSMiddleware, allow_origins=_origins,
                    allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
 configure_logging()
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+EVENTS_RATE_LIMIT = os.environ.get("EVENTS_RATE_LIMIT", "120/minute")
+AUDIT_RATE_LIMIT = os.environ.get("AUDIT_RATE_LIMIT", "20/minute")
 
 POLICY_PATH = os.environ.get("BLACKBOX_POLICY", "policies/eu_ai_act.yaml")
 _pack = load_policy_pack(POLICY_PATH)
@@ -41,7 +51,8 @@ def ready():
 
 # ---- ingest (machine auth: API key) --------------------------------------------------------
 @app.post("/events")
-def ingest(e: Event, org_id: str = Depends(org_from_api_key)) -> Event:
+@limiter.limit(EVENTS_RATE_LIMIT)
+def ingest(request: Request, e: Event, org_id: str = Depends(org_from_api_key)) -> Event:
     return store.append(org_id, e)
 
 # ---- reads (human auth: JWT) ---------------------------------------------------------------
@@ -58,7 +69,8 @@ def verify(session_id: str | None = None, org_id: str = Depends(current_org)) ->
     return {"chain_intact": store.verify_chain(org_id, session_id)}
 
 @app.post("/audit/{session_id}")
-def audit_session(session_id: str, org_id: str = Depends(current_org)) -> list[Verdict]:
+@limiter.limit(AUDIT_RATE_LIMIT)
+def audit_session(request: Request, session_id: str, org_id: str = Depends(current_org)) -> list[Verdict]:
     api_key = get_byok(org_id, "anthropic")   # None -> offline deterministic audit
     return audited_run(store, org_id, session_id, _pack, api_key)
 
