@@ -28,11 +28,14 @@ def _jwt(user_id):
                       "test-secret", algorithm="HS256")
 
 def test_sessions_lists_org_sessions(client):
-    org = create_org("Acme", "u1"); key = create_api_key(org, "ci")
-    kh = {"Authorization": f"Bearer {key}"}
+    # Seed via the Store directly so the test does not depend on the /events rate limit
+    # (other test modules mutate EVENTS_RATE_LIMIT, which would otherwise 429 these posts).
+    from blackbox.store import Store
+    from blackbox.schema import Event
+    org = create_org("Acme", "u1")
+    s = Store()
     for sid in ("s-a", "s-a", "s-b"):
-        client.post("/events", json={"agent_id": "a", "session_id": sid, "kind": "tool_call",
-                                     "tool": "t", "args": {}, "intent": "x"}, headers=kh)
+        s.append(org, Event(agent_id="a", session_id=sid, kind="tool_call", tool="t", intent="x"))
     r = client.get("/sessions", headers={"Authorization": f"Bearer {_jwt('u1')}"})
     assert r.status_code == 200
     sessions = {s["session_id"]: s for s in r.json()}
