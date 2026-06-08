@@ -6,3 +6,9 @@ __pycache__
 *.egg-info
 docs
 .github
+frontend
+node_modules
+tests
+.agents
+.claude
+.mcp.json

@@ -1,6 +1,19 @@
+---
+title: BLACKBOX API
+emoji: 🛡️
+colorFrom: gray
+colorTo: red
+sdk: docker
+app_port: 8900
+pinned: false
+---
+
 # 🛡 BLACKBOX
 
 **Flight recorder + autonomous compliance tribunal for AI agents.**
+
+> This Hugging Face Space runs the BLACKBOX **API** (FastAPI). Health check: `/health`.
+> Source & full docs: https://github.com/iWeslax83/blackbox-agent-accountability
 
 [![CI](https://github.com/iWeslax83/blackbox-agent-accountability/actions/workflows/ci.yml/badge.svg)](https://github.com/iWeslax83/blackbox-agent-accountability/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
