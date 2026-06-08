@@ -12,6 +12,7 @@ export default function KeysPage() {
   const [created, setCreated] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -70,6 +71,18 @@ export default function KeysPage() {
             ))}
           </ul>
         )}
+
+        <div className="section-title"><h2>Record an event</h2></div>
+        <p className="muted small">Send agent actions to BLACKBOX with your key as a bearer token:</p>
+        <pre className="notice" style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+{`curl -X POST ${apiBase}/events \\
+  -H "Authorization: Bearer bb_live_…" \\
+  -H "Content-Type: application/json" \\
+  -d '{"agent_id":"my-agent","session_id":"sess-1",
+       "kind":"tool_call","tool":"send_email",
+       "args":{"to":"x@y.com"},"intent":"send report"}'`}
+        </pre>
+        <p className="muted small">Then open <a href="/app">Sessions</a> to verify the chain and run the tribunal.</p>
       </main>
     </>
   );
