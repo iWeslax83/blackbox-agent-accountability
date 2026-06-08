@@ -16,8 +16,11 @@ export default function LoginPage() {
     e.preventDefault();
     setErr(null);
     setBusy(true);
-    const fn = mode === "login" ? sb.auth.signInWithPassword : sb.auth.signUp;
-    const { error } = await fn({ email, password });
+    // Call directly on sb.auth — destructuring/aliasing the method drops its `this`, which makes
+    // the supabase client read `this.fetch` off undefined ("can't access property fetch").
+    const { error } = mode === "login"
+      ? await sb.auth.signInWithPassword({ email, password })
+      : await sb.auth.signUp({ email, password });
     setBusy(false);
     if (error) return setErr(error.message);
     router.push("/app");
