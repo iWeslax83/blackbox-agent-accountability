@@ -11,19 +11,47 @@ export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
     setBusy(true);
-    // Call directly on sb.auth — destructuring/aliasing the method drops its `this`, which makes
-    // the supabase client read `this.fetch` off undefined ("can't access property fetch").
-    const { error } = mode === "login"
-      ? await sb.auth.signInWithPassword({ email, password })
-      : await sb.auth.signUp({ email, password });
-    setBusy(false);
-    if (error) return setErr(error.message);
-    router.push("/app");
+    // Call directly on sb.auth — aliasing the method drops its `this` (the client then reads
+    // this.fetch off undefined).
+    if (mode === "login") {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      setBusy(false);
+      if (error) return setErr(error.message);
+      router.push("/app");
+    } else {
+      const { data, error } = await sb.auth.signUp({
+        email, password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      setBusy(false);
+      if (error) return setErr(error.message);
+      if (!data.session) { setSent(true); return; }   // confirmation required: email sent
+      router.push("/app");                              // confirmation disabled: straight in
+    }
+  }
+
+  if (sent) {
+    return (
+      <main className="center-screen">
+        <div className="card auth-card">
+          <div className="brand" style={{ marginBottom: 16 }}><span className="mark">🛡</span> BLACKBOX</div>
+          <h1 style={{ marginBottom: 8 }}>Check your inbox</h1>
+          <p className="muted small" style={{ marginBottom: 20 }}>
+            We sent a confirmation link to <strong>{email}</strong>. Click it to activate your
+            account, then you’ll be signed in automatically.
+          </p>
+          <button className="btn btn-ghost" onClick={() => { setSent(false); setMode("login"); }}>
+            Back to log in
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -50,8 +78,9 @@ export default function LoginPage() {
           </div>
           <div className="field">
             <label className="label">Password</label>
-            <input className="input" type="password" autoComplete="current-password" placeholder="••••••••"
-                   value={password} onChange={e => setPassword(e.target.value)} required />
+            <input className="input" type="password"
+                   autoComplete={mode === "login" ? "current-password" : "new-password"}
+                   placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
           <button className="btn btn-primary" type="submit" disabled={busy}>
             {busy ? "…" : mode === "login" ? "Log in" : "Sign up"}
