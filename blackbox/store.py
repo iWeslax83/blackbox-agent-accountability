@@ -101,3 +101,13 @@ class Store:
                 return False
             prev = e.hash
         return True
+
+    def sessions(self, org_id: str) -> list[dict]:
+        """One row per session in the org: id, event count, latest timestamp. Newest first."""
+        sql = ("SELECT session_id, count(*) AS events, max(ts) AS last_ts "
+               "FROM events WHERE org_id=%s GROUP BY session_id ORDER BY max(seq) DESC")
+        self._assert_scoped(org_id, sql)
+        with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (org_id,))
+            rows = cur.fetchall()
+        return [{"session_id": r["session_id"], "events": r["events"], "last_ts": r["last_ts"]} for r in rows]
