@@ -13,6 +13,9 @@ def apply_migrations(pool=None) -> list[str]:
             cur.execute(
                 "CREATE TABLE IF NOT EXISTS schema_migrations ("
                 " name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())")
+            # Deny-all RLS, matching every other public table (migrations/*.sql).
+            # Idempotent: re-enabling is a no-op. The service-role pool bypasses RLS.
+            cur.execute("ALTER TABLE schema_migrations ENABLE ROW LEVEL SECURITY")
             cur.execute("SELECT name FROM schema_migrations")
             applied = {r[0] for r in cur.fetchall()}
         for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
