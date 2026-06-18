@@ -5,15 +5,14 @@ export default function Landing() {
       {/* ── NAV ── */}
       <nav style={{
         position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(244,239,230,.92)",
-        backdropFilter: "blur(8px)",
+        background: "#f4efe6",
         borderBottom: "1px solid #e3dccd",
         padding: "0 2rem",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         height: 58,
       }}>
         <a href="#" style={{ fontSize: "1.15rem", fontWeight: 700, letterSpacing: "-.01em", color: "#1a1714", textDecoration: "none", display: "flex", alignItems: "center", gap: ".35rem" }}>
-          🛡 BLACKBOX
+          BLACKBOX
         </a>
         <ul style={{ display: "flex", alignItems: "center", gap: "1.6rem", listStyle: "none", margin: 0, padding: 0 }}>
           <li><a href="#how" style={{ color: "#1a1714", fontSize: ".9rem", fontWeight: 500, textDecoration: "none" }}>How it works</a></li>
@@ -29,7 +28,7 @@ export default function Landing() {
       </nav>
 
       {/* ── HERO ── */}
-      <section id="hero" style={{ padding: "6.5rem 2rem 5rem", background: "linear-gradient(160deg, #f9f6f1 0%, #f4efe6 100%)" }}>
+      <section id="hero" style={{ padding: "6.5rem 2rem 5rem", background: "#f9f6f1" }}>
         <div style={{ maxWidth: 780, margin: "0 auto", textAlign: "center" }}>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: ".4rem",
@@ -38,7 +37,7 @@ export default function Landing() {
             padding: ".3rem .75rem", borderRadius: 20, marginBottom: "1.6rem",
             border: "1px solid #f0cfc4",
           }}>
-            🇪🇺 EU AI Act · Art. 10 / 12 / 14 / 15
+            EU AI Act · Art. 10 / 12 / 14 / 15
           </div>
           <h1 style={{ fontSize: "clamp(2.4rem, 6vw, 3.6rem)", fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1.1, marginBottom: "1.2rem" }}>
             Prove what your <span style={{ color: "#b4451f" }}>AI agents</span> did.
@@ -69,11 +68,11 @@ export default function Landing() {
           </div>
           <div style={{ marginTop: "2.2rem", fontSize: ".82rem", color: "#8a8275", display: "flex", alignItems: "center", justifyContent: "center", gap: ".5rem" }}>
             <span>Built with</span>
-            <span>🔗 LangGraph</span>
+            <span>LangGraph</span>
             <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#e3dccd", display: "inline-block" }}></span>
-            <span>🤖 Claude</span>
+            <span>Claude</span>
             <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#e3dccd", display: "inline-block" }}></span>
-            <span>⚡ FastAPI</span>
+            <span>FastAPI</span>
           </div>
 
           {/* Terminal preview */}
@@ -140,13 +139,13 @@ export default function Landing() {
           <p style={{ fontSize: "1.05rem", color: "#8a8275", maxWidth: 640 }}>From first action to court-ready evidence pack — fully automated.</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "1.2rem", marginTop: "2.5rem" }}>
             {[
-              { icon: "📼", title: "Recorder", desc: "Every agent action — LLM calls, tool invocations, results — is appended to a SHA-256 hash-chained log. Any silent edit breaks the chain immediately, providing tamper-evident provenance." },
-              { icon: "⚖️", title: "Tribunal", desc: "An autonomous multi-agent panel audits the full log against a structured EU AI Act policy pack. Each violation is flagged with cited evidence, article references, severity, and confidence score." },
-              { icon: "🔁", title: "Replay", desc: "Reconstruct any incident step-by-step: see the exact decision chain, which prompt triggered which tool call, and where the root cause lies — indispensable for post-incident review." },
-              { icon: "📋", title: "Evidence Pack", desc: "One click exports an auditor-ready compliance report: incident summary, violation table with framework references, full action log, and chain-integrity status — formatted for regulators." },
-            ].map(({ icon, title, desc }) => (
+              { title: "Recorder", desc: "Every agent action — LLM calls, tool invocations, results — is appended to a SHA-256 hash-chained log. Any silent edit breaks the chain immediately, providing tamper-evident provenance." },
+              { title: "Tribunal", desc: "An autonomous multi-agent panel audits the full log against a structured EU AI Act policy pack. Each violation is flagged with cited evidence, article references, severity, and confidence score." },
+              { title: "Replay", desc: "Reconstruct any incident step-by-step: see the exact decision chain, which prompt triggered which tool call, and where the root cause lies — indispensable for post-incident review." },
+              { title: "Evidence Pack", desc: "One click exports an auditor-ready compliance report: incident summary, violation table with framework references, full action log, and chain-integrity status — formatted for regulators." },
+            ].map(({ title, desc }, i) => (
               <div key={title} style={{ background: "#fff", border: "1px solid #e3dccd", borderRadius: 10, padding: "1.5rem", boxShadow: "0 2px 12px rgba(26,23,20,.07)" }}>
-                <div style={{ fontSize: "1.8rem", marginBottom: ".75rem" }}>{icon}</div>
+                <div style={{ fontSize: ".8rem", fontWeight: 700, color: "#b4451f", marginBottom: ".75rem", fontFamily: "ui-monospace, monospace", letterSpacing: ".08em" }}>{String(i + 1).padStart(2, "0")}</div>
                 <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: ".4rem" }}>{title}</h3>
                 <p style={{ fontSize: ".875rem", color: "#8a8275" }}>{desc}</p>
               </div>
@@ -241,7 +240,7 @@ export default function Landing() {
       {/* ── FOOTER ── */}
       <footer style={{ background: "#1a1714", color: "#8a8275", padding: "2rem", textAlign: "center", fontSize: ".83rem" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: ".5rem" }}>
-          <div>🛡 <strong style={{ color: "#c9bfaf" }}>BLACKBOX</strong> — AI Agent Accountability &amp; Compliance</div>
+          <div><strong style={{ color: "#c9bfaf" }}>BLACKBOX</strong> — AI Agent Accountability &amp; Compliance</div>
           <div>
             <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" style={{ color: "#a09890", textDecoration: "none" }}>GitHub</a>
             &nbsp;·&nbsp; MIT licensed &nbsp;·&nbsp;

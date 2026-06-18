@@ -88,7 +88,7 @@ h2 { font-size: 1.05rem; letter-spacing: 0.01em; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* top nav */
-.topnav { border-bottom: 1px solid var(--border); background: rgba(251, 248, 241, 0.72); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10; }
+.topnav { border-bottom: 1px solid var(--border); background: #fbf8f1; position: sticky; top: 0; z-index: 10; }
 .topnav .inner { max-width: 880px; margin: 0 auto; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; }
 .navlinks { display: flex; align-items: center; gap: 20px; font-size: 0.9rem; }
 .navlinks a { color: var(--ink); }
