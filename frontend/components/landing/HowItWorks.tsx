@@ -1,8 +1,8 @@
 export default function HowItWorks() {
   const pillars = [
-    { title: "Recorder", desc: "Every agent action, LLM calls, tool invocations, results, is appended to a SHA-256 hash-chained log. Any silent edit breaks the chain immediately, providing tamper-evident provenance." },
+    { title: "Recorder", desc: "Every agent action (LLM calls, tool invocations, results) is appended to a SHA-256 hash-chained log. Any silent edit breaks the chain immediately, providing tamper-evident provenance." },
     { title: "Tribunal", desc: "An autonomous multi-agent panel audits the full log against a structured EU AI Act policy pack. Each violation is flagged with cited evidence, article references, severity, and confidence score." },
-    { title: "Replay", desc: "Reconstruct any incident step-by-step: see the exact decision chain, which prompt triggered which tool call, and where the root cause lies, indispensable for post-incident review." },
+    { title: "Replay", desc: "Reconstruct any incident step-by-step: see the exact decision chain, which prompt triggered which tool call, and where the root cause lies: indispensable for post-incident review." },
     { title: "Evidence Pack", desc: "One click exports an auditor-ready compliance report: incident summary, violation table with framework references, full action log, and chain-integrity status, formatted for regulators." },
   ];
 

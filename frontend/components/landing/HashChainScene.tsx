@@ -50,6 +50,7 @@ export default function HashChainScene() {
       camera={{ position: [0, 1.4, 6], fov: 42 }}
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true }}
+      aria-label="Six linked hash-chain blocks, the last one highlighted, representing BLACKBOX's tamper-evident log chain, rotating slowly"
     >
       <ambientLight intensity={0.7} />
       <directionalLight position={[3, 4, 5]} intensity={0.9} />

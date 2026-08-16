@@ -17,7 +17,7 @@ export default function Hero() {
           Prove what your <span style={{ color: "#b4451f" }}>AI agents</span> did.
         </h1>
         <p style={{ fontSize: "1.15rem", color: "#8a8275", maxWidth: 600, margin: "0 auto 2.4rem" }}>
-          BLACKBOX is a flight recorder and autonomous compliance tribunal for AI agents,
+          BLACKBOX is a flight recorder and autonomous compliance tribunal for AI agents:
           tamper-evident logs, regulator-ready evidence packs, and a multi-agent audit panel
           that flags violations before an inspector does.
         </p>

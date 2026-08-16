@@ -9,7 +9,7 @@ export default function HashChainStatic() {
   const blocks = buildChainBlocks(6);
   const blockSize = 64;
   const gapX = 96;
-  const width = blocks.length * gapX + blockSize;
+  const width = (blocks.length - 1) * gapX + blockSize;
   const height = 160;
   const centerY = height / 2;
 
