@@ -11,7 +11,7 @@ export default function TopNav() {
   return (
     <header className="topnav">
       <div className="inner">
-        <a href="/app" className="brand"><span className="mark">🛡</span> BLACKBOX</a>
+        <a href="/app" className="brand"><span className="mark">B</span> BLACKBOX</a>
         <nav className="navlinks">
           <a href="/app">Sessions</a>
           <a href="/app/keys">API keys</a>
