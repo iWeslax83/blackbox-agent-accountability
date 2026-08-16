@@ -1,10 +1,16 @@
 // frontend/app/page.tsx
+import type { Metadata } from "next";
 import Hero from "@/components/landing/Hero";
 import Problem from "@/components/landing/Problem";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Pricing from "@/components/landing/Pricing";
 import Cta from "@/components/landing/Cta";
 import Footer from "@/components/landing/Footer";
+
+export const metadata: Metadata = {
+  title: "BLACKBOX: AI Agent Accountability",
+  description: "Tamper-evident flight recorder and autonomous compliance tribunal for AI agents. Prove what your AI agents did, before a regulator asks.",
+};
 
 export default function Landing() {
   return (
