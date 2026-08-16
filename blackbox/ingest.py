@@ -1,4 +1,5 @@
 # blackbox/blackbox/ingest.py
+import logging
 import os
 from fastapi import FastAPI, Depends, Body, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,6 +51,7 @@ def ready():
             cur.fetchone()
         return {"db": True}
     except Exception:
+        logging.exception("db readiness check failed")
         return Response(content='{"db": false}', media_type="application/json", status_code=503)
 
 # ---- ingest (machine auth: API key) --------------------------------------------------------
