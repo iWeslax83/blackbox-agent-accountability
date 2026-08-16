@@ -1,0 +1,61 @@
+// frontend/app/not-found.tsx
+export default function NotFound() {
+  return (
+    <main
+      style={{
+        minHeight: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 16,
+        padding: 24,
+        background: "#f4efe6",
+        color: "#1a1714",
+        textAlign: "center",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 12,
+          background: "#1a1714",
+          color: "#f4efe6",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 24,
+          fontWeight: 800,
+        }}
+      >
+        B
+      </div>
+      <h1 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-0.02em", margin: 0 }}>
+        Page not found
+      </h1>
+      <p style={{ color: "#8a8275", maxWidth: 420, margin: 0 }}>
+        The page you're looking for doesn't exist or has moved. Check the URL, or head back to
+        the homepage.
+      </p>
+      <a
+        href="/"
+        style={{
+          marginTop: 8,
+          display: "inline-flex",
+          alignItems: "center",
+          padding: ".75rem 1.6rem",
+          borderRadius: 8,
+          fontSize: ".95rem",
+          fontWeight: 600,
+          background: "#b4451f",
+          color: "#fff",
+          textDecoration: "none",
+        }}
+      >
+        Back to homepage
+      </a>
+    </main>
+  );
+}
