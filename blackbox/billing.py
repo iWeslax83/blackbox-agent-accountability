@@ -1,0 +1,120 @@
+# blackbox/blackbox/billing.py
+import hashlib, hmac, json, os
+from typing import Optional
+
+import httpx
+
+from .db import get_pool
+
+API_BASE = "https://api.lemonsqueezy.com/v1"
+PRO_VARIANT_ID = os.environ.get("LEMONSQUEEZY_VARIANT_ID_PRO", "")
+
+
+def _api_key() -> str:
+    return os.environ["LEMONSQUEEZY_API_KEY"]
+
+
+def _store_id() -> str:
+    return os.environ["LEMONSQUEEZY_STORE_ID"]
+
+
+def create_checkout_session(org_id: str, user_email: str) -> str:
+    """Create a hosted LemonSqueezy checkout, stamped with org_id so the webhook
+    can attribute the resulting subscription back to the org without a lookup table."""
+    resp = httpx.post(
+        f"{API_BASE}/checkouts",
+        headers={
+            "Authorization": f"Bearer {_api_key()}",
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+        },
+        json={
+            "data": {
+                "type": "checkouts",
+                "attributes": {
+                    "checkout_data": {
+                        "email": user_email,
+                        "custom": {"org_id": org_id},
+                    },
+                },
+                "relationships": {
+                    "store": {"data": {"type": "stores", "id": _store_id()}},
+                    "variant": {"data": {"type": "variants", "id": PRO_VARIANT_ID}},
+                },
+            }
+        },
+        timeout=10,
+    )
+    resp.raise_for_status()
+    return resp.json()["data"]["attributes"]["url"]
+
+
+def create_portal_session(org_id: str) -> Optional[str]:
+    """Customer portal link for the org's active subscription, if any."""
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT billing_subscription_id FROM orgs WHERE id=%s", (org_id,))
+        row = cur.fetchone()
+    if not row or not row[0]:
+        return None
+    resp = httpx.get(
+        f"{API_BASE}/subscriptions/{row[0]}",
+        headers={"Authorization": f"Bearer {_api_key()}", "Accept": "application/vnd.api+json"},
+        timeout=10,
+    )
+    resp.raise_for_status()
+    return resp.json()["data"]["attributes"]["urls"]["customer_portal"]
+
+
+def verify_signature(raw_body: bytes, signature_header: str) -> bool:
+    secret = os.environ["LEMONSQUEEZY_WEBHOOK_SECRET"].encode("utf-8")
+    digest = hmac.new(secret, raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(digest, signature_header or "")
+
+
+_ACTIVE_STATUSES = {"active", "on_trial"}
+
+
+def handle_webhook(raw_body: bytes, signature_header: str) -> None:
+    """Verify and apply a LemonSqueezy subscription webhook. Every event is logged to
+    billing_events (verified or not) before any org row is touched, so a bad signature
+    or a malformed payload never silently drops a billing event on the floor."""
+    signature_ok = verify_signature(raw_body, signature_header)
+    payload = json.loads(raw_body)
+    event_type = payload.get("meta", {}).get("event_name", "unknown")
+    org_id = payload.get("meta", {}).get("custom_data", {}).get("org_id")
+
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO billing_events(provider,event_type,org_id,payload,signature_ok) "
+            "VALUES('lemonsqueezy',%s,%s,%s,%s)",
+            (event_type, org_id, json.dumps(payload), signature_ok),
+        )
+        conn.commit()
+
+        if not signature_ok:
+            raise ValueError("invalid webhook signature")
+        if not org_id or event_type not in (
+            "subscription_created", "subscription_updated", "subscription_cancelled",
+            "subscription_expired", "subscription_payment_failed", "subscription_payment_success",
+        ):
+            return
+
+        attrs = payload.get("data", {}).get("attributes", {})
+        status = attrs.get("status", "")
+        subscription_id = payload.get("data", {}).get("id")
+        renews_at = attrs.get("renews_at")
+
+        plan = "pro" if status in _ACTIVE_STATUSES else "free"
+        cur.execute(
+            "UPDATE orgs SET plan=%s, plan_status=%s, billing_subscription_id=%s, "
+            "plan_renews_at=%s WHERE id=%s",
+            (plan, status, subscription_id, renews_at, org_id),
+        )
+        conn.commit()
+
+
+def org_plan(org_id: str) -> str:
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT plan FROM orgs WHERE id=%s", (org_id,))
+        row = cur.fetchone()
+    return row[0] if row else "free"

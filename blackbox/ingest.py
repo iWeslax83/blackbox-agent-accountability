@@ -16,6 +16,9 @@ from .byok import set_byok, get_byok, clear_byok, has_byok
 from .auditlock import audited_run
 from .logging_config import configure_logging
 from .evidence import build_evidence_pack
+from .billing import create_checkout_session, create_portal_session, handle_webhook, org_plan
+from .usage import (HOSTED_AUDIT_MONTHLY_LIMIT, hosted_audit_count,
+                     increment_hosted_audit_usage, under_hosted_audit_limit)
 
 store = Store()
 app = FastAPI(title="BLACKBOX")
@@ -75,8 +78,14 @@ def verify(session_id: str | None = None, org_id: str = Depends(current_org)) ->
 @app.post("/audit/{session_id}")
 @limiter.limit(AUDIT_RATE_LIMIT)
 def audit_session(request: Request, session_id: str, org_id: str = Depends(current_org)) -> list[Verdict]:
-    api_key = get_byok(org_id, "anthropic")   # None -> offline deterministic audit
-    return audited_run(store, org_id, session_id, _pack, api_key)
+    api_key = get_byok(org_id, "anthropic")
+    if not api_key and org_plan(org_id) == "pro" and under_hosted_audit_limit(org_id):
+        # Pro orgs without their own BYOK key ride the hosted key, metered per calendar
+        # month so a runaway org can't spend unbounded amounts of our Anthropic budget.
+        api_key = os.environ.get("BLACKBOX_HOSTED_ANTHROPIC_KEY")
+        if api_key:
+            increment_hosted_audit_usage(org_id)
+    return audited_run(store, org_id, session_id, _pack, api_key)   # still None -> offline audit
 
 @app.put("/byok")
 def put_byok(key: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:
@@ -146,3 +155,32 @@ def keys(org_id: str = Depends(current_org)) -> list[dict]:
 def delete_key(key_id: int, org_id: str = Depends(current_org)) -> dict:
     revoke_api_key(org_id, key_id)
     return {"revoked": key_id}
+
+# ---- billing (human auth: JWT) --------------------------------------------------------------
+@app.get("/billing/plan")
+def billing_plan(org_id: str = Depends(current_org)) -> dict:
+    return {"plan": org_plan(org_id)}
+
+@app.get("/billing/usage")
+def billing_usage(org_id: str = Depends(current_org)) -> dict:
+    return {"hosted_audits_used": hosted_audit_count(org_id), "limit": HOSTED_AUDIT_MONTHLY_LIMIT}
+
+@app.post("/billing/checkout")
+def billing_checkout(email: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:
+    return {"url": create_checkout_session(org_id, email)}
+
+@app.post("/billing/portal")
+def billing_portal(org_id: str = Depends(current_org)) -> dict:
+    url = create_portal_session(org_id)
+    if not url:
+        raise HTTPException(status_code=404, detail="no active subscription")
+    return {"url": url}
+
+@app.post("/billing/webhook")
+async def billing_webhook(request: Request, x_signature: str = Header(default=None)) -> dict:
+    raw = await request.body()
+    try:
+        handle_webhook(raw, x_signature)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="invalid webhook signature")
+    return {"ok": True}
