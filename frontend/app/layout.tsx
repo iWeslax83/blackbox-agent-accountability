@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "BLACKBOX — AI Agent Accountability",
+  metadataBase: new URL(siteUrl),
+  title: "BLACKBOX: AI Agent Accountability",
   description: "Tamper-evident flight recorder + autonomous compliance tribunal for AI agents.",
 };
 
