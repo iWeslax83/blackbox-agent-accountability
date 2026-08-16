@@ -111,6 +111,17 @@ h2 { font-size: 1.05rem; letter-spacing: 0.01em; }
 .sev { text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em; }
 .sev.critical, .sev.high { color: var(--rust); }
 
+/* plan tag: bordered rectangle, not a pill */
+.plan-tag {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 4px 10px; border: 1px solid var(--border); border-radius: 4px; color: var(--ink);
+}
+
+/* usage meter */
+.meter { height: 8px; border-radius: 4px; background: #efe9dd; overflow: hidden; }
+.meter-fill { height: 100%; background: var(--rust); }
+
 /* misc */
 .error { color: var(--rust); font-size: 0.86rem; margin-top: 12px; }
 .notice { background: #fff; border: 1px dashed var(--border); border-radius: 9px; padding: 12px 14px; font-size: 0.85rem; color: var(--muted); margin-top: 14px; }
