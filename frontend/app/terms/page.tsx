@@ -1,0 +1,77 @@
+// frontend/app/terms/page.tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service: BLACKBOX",
+  description: "The terms governing your use of BLACKBOX.",
+};
+
+const sectionStyle: React.CSSProperties = { marginBottom: "2rem" };
+const headingStyle: React.CSSProperties = { fontSize: "1.15rem", fontWeight: 700, marginBottom: ".6rem" };
+const bodyStyle: React.CSSProperties = { color: "#4a4540", lineHeight: 1.65 };
+
+export default function TermsPage() {
+  return (
+    <main style={{ background: "#f4efe6", color: "#1a1714", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "4rem 2rem 6rem" }}>
+        <a href="/" style={{ color: "#b4451f", fontSize: ".9rem", fontWeight: 600, textDecoration: "none" }}>&larr; Back to homepage</a>
+        <h1 style={{ fontSize: "2.2rem", fontWeight: 800, letterSpacing: "-.02em", margin: "1.5rem 0 .5rem" }}>Terms of Service</h1>
+        <p style={{ color: "#8a8275", fontSize: ".9rem", marginBottom: "2.5rem" }}>
+          Last updated 2026-08-17. This is a plain-language summary of our terms, not legal advice. If you need a legal opinion on these terms, consult qualified counsel.
+        </p>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>The service</h2>
+          <p style={bodyStyle}>
+            BLACKBOX is a flight recorder and compliance tribunal for AI agent actions. The core recorder and audit engine are open source (MIT licensed) and can be self-hosted for free. We also offer a hosted Pro plan with a managed dashboard, scheduled audits, and priority support.
+          </p>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Your account</h2>
+          <p style={bodyStyle}>
+            You're responsible for the security of your account credentials and your API keys, including any Anthropic key you supply under BYOK. You're responsible for the content of the agent logs you submit for auditing.
+          </p>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Acceptable use</h2>
+          <p style={bodyStyle}>
+            Don't use BLACKBOX to process data you don't have the right to process, or to circumvent the usage limits of your plan. We reserve the right to suspend accounts that abuse the service.
+          </p>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Billing</h2>
+          <p style={bodyStyle}>
+            Paid plans are billed through LemonSqueezy, our merchant of record. Subscriptions renew automatically until cancelled. You can manage or cancel your subscription from the billing page in your dashboard, which links to LemonSqueezy's customer portal.
+          </p>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>No warranty</h2>
+          <p style={bodyStyle}>
+            BLACKBOX is a technical tool, not legal advice, and does not guarantee regulatory compliance with the EU AI Act or any other framework. The service is provided "as is," without warranty of any kind, to the maximum extent permitted by law.
+          </p>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Termination</h2>
+          <p style={bodyStyle}>
+            You can stop using the service and delete your account at any time. We may suspend or terminate accounts that violate these terms.
+          </p>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={headingStyle}>Contact</h2>
+          <p style={bodyStyle}>
+            BLACKBOX is an open-source project (MIT licensed) based in Bursa, Türkiye. For questions about these terms, open an issue at{" "}
+            <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" style={{ color: "#b4451f" }}>
+              github.com/iWeslax83/blackbox-agent-accountability
+            </a>.
+          </p>
+        </section>
+      </div>
+    </main>
+  );
+}
