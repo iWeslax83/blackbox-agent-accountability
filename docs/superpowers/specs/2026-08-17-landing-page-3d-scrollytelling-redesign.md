@@ -46,12 +46,15 @@ Replaces the current Hero / Problem / HowItWorks / Pricing / Cta / Footer stack 
 
 **Entrances and exits are both deliberate.** Each scene above needs both an entry treatment (already described per scene) and an explicit exit treatment tied to the next scene's arrival, not just a fade-to-nothing: e.g. the Recorder scene's chain should visibly recede/dim as the Tribunal scene's nodes begin appearing in front of it, rather than the chain abruptly vanishing before the next scene starts. This exit choreography is a required part of each scene's implementation, not left as an afterthought once entrances are done.
 
+**Concrete timing.** Per-element entrance/exit fades within a scene (e.g. one stat number fading in, one tribunal node flipping color) target 200-300ms; the exit is faster than the enter, roughly 60-70% of the enter's duration (~150-200ms), consistent with the wider design system's existing momentum. No fading element should hold at an opacity below 0.2 mid-transition — either commit to fully visible or fully hidden, don't leave things lingering faint. These are starting values to tune against real scroll speed during implementation, not hard-locked, but "brief"/"short" alone is not sufficient for the plan to implement against.
+
 ## Mobile & reduced-motion behavior
 
 Extends the pattern already established by `HeroChain.tsx`/`useReducedMotion.ts` from the prior plan (do not reinvent it):
 
 - `prefers-reduced-motion: reduce`, viewport `< 768px`, or no WebGL support: the scroll-scrubbed camera experience is replaced entirely. Each scene renders as a normal stacked HTML section (the scene's HTML content, plus a static image or simplified static SVG standing in for that scene's 3D moment, reusing the existing `HashChainStatic` component for the Recorder scene and simple static equivalents for the others) in normal document flow with normal scroll. No `ScrollControls`, no continuous canvas, no camera movement.
 - On the reduced/mobile path, section-to-section transitions use short opacity cross-fades on scroll-into-view (via `IntersectionObserver`, not scroll-position math), never slides or parallax, per Apple-design §14. No elastic/overshoot easing anywhere on this path.
+- The reduced/mobile fallback's full-height sections (if any section needs to fill the viewport, e.g. the Opening scene's stacked equivalent) use `min-height: 100dvh`, never `100vh`, following the same convention already established in the prior plans (`not-found.tsx`, the plan's own Global Constraints).
 - On the full desktop 3D path, scroll IS the interruption/redirect mechanism (§3): because the camera position is a pure function of scroll offset (via `ScrollControls`), scrolling up mid-transition naturally and instantly reverses the camera with no separate "undo" logic needed — this is why `ScrollControls` was chosen over a GSAP ScrollTrigger + Three.js timeline approach, which would need explicit interrupt handling.
 
 ## Typography
@@ -69,6 +72,13 @@ This is a concrete instruction for the implementation plan, not left to per-comp
 
 - Primary/secondary CTA buttons get explicit `:active` press feedback: `transform: scale(0.97)`, `transition: transform 100ms ease-out` (Apple-design §1/§4) — currently absent from the codebase's buttons.
 - No custom cursor, no magnetic buttons, no particle effects, no holographic/liquid-glass panels — these are explicitly excluded per the project's own anti-AI-slop rules (`design-taste-frontend-v1`'s "AI Tells" section) despite being available in that skill's creative arsenal; the brief is "different and premium," not "every trend at once."
+
+## Accessibility
+
+- **Focus states.** Every interactive element on the new dark theme (nav links, primary/secondary CTAs, pricing tier buttons, footer links) must keep a visible focus ring on keyboard `:focus-visible` (a 2-3px ring in a color with sufficient contrast against `#0d0c0b`, e.g. the lighter `#d97a4a` accent or off-white `#f4efe6`, not the default browser outline which is often invisible on dark backgrounds if left unstyled). This was not addressed in the prior two plans' dark-adjacent work and must not be dropped here.
+- **Canvas accessibility.** The `<Canvas>` element (or its wrapping container) needs a real `aria-label` describing the scene sequence's content, applied to an element that actually reaches the accessibility tree — the prior plan's final review found that `@react-three/fiber`'s `<Canvas>` spreads unrecognized props onto its outer wrapper `<div>`, not the inner `<canvas>` DOM node, so `aria-label` placement must be re-verified against the installed R3F version's `CanvasImpl` behavior during implementation, not assumed to land correctly from a prop.
+- **Color contrast verification.** The accent-on-dark text color (`#d97a4a` on `#0d0c0b`) must be measured against WCAG AA (4.5:1 normal text, 3:1 large text) before use for body-sized text; if it falls short, lighten the accent for text-only use while keeping the more saturated `#b4451f` for filled button backgrounds (button text contrast against the button's own fill is a separate, also-required check).
+- **Keyboard scroll verification.** Once `ScrollControls` damping is tuned, verify keyboard-driven scrolling (Page Down/Page Up, Space, arrow keys, Home/End) still moves the camera through scenes correctly, in addition to the anchor-link check already specified above — damped/virtualized scroll containers can sometimes intercept or desync from native keyboard scroll handling.
 
 ## Explicitly kept as-is (resolved tensions from design-taste-frontend-v1 review)
 
@@ -88,6 +98,8 @@ This is a concrete instruction for the implementation plan, not left to per-comp
 - Pure-logic pieces (extended `chainData.ts` block generation for the longer Recorder-scene chain, any new scroll-progress-to-scene-index mapping function) get unit tests, following the TDD pattern already used for `chainData.test.ts`/`useReducedMotion.test.ts`.
 - The 3D scene components themselves are not unit-testable (same rationale as the prior plan: WebGL isn't testable in jsdom) — verified via manual/browser checks (Chromium only, per the project's browser-automation rule) at each implementation step: desktop full-3D path renders and scroll-scrubs correctly, reduced-motion path shows the cross-fade stacked fallback, mobile width shows the fallback, no console errors, no horizontal scroll, single `<h1>` per effectively-visible "page" state.
 - Full production build (`npm run build`) must still succeed and prerender the route statically, consistent with the prior two plans' verification standard.
+- **Layout shift check.** `ScrollControls`'s `pages` prop determines total scrollable height; verify the fallback/loading state (before the 3D bundle and its assets finish mounting) reserves the same page height the final mounted experience will need, so there is no visible jump in scrollbar size or page height once the canvas finishes loading. Measure with a real CLS check (e.g. Chrome DevTools Performance panel or a Lighthouse run against the production build), not just eyeballing it.
+- **Frame budget check.** With multiple scenes' geometry potentially resident at once (even if only one is in-focus), verify actual frame time stays near the ~16ms/60fps budget during scroll on the production build, not just that the page "feels smooth" anecdotally — record this with the browser's performance profiler during the manual verification pass.
 
 ## Open implementation risk (flagged for the plan, not blocking this spec)
 
