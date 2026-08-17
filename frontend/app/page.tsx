@@ -6,6 +6,7 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import Pricing from "@/components/landing/Pricing";
 import Cta from "@/components/landing/Cta";
 import Footer from "@/components/landing/Footer";
+import StickyMobileCta from "@/components/landing/StickyMobileCta";
 
 export const metadata: Metadata = {
   title: "BLACKBOX: AI Agent Accountability",
@@ -45,6 +46,7 @@ export default function Landing() {
       <Pricing />
       <Cta />
       <Footer />
+      <StickyMobileCta />
     </main>
   );
 }
