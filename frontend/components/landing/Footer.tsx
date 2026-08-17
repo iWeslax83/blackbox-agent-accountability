@@ -1,21 +1,23 @@
+import { DARK_BG, TEXT_ON_DARK, MUTED_ON_DARK } from "@/lib/landingTheme";
+
 export default function Footer() {
   return (
-    <footer className="site-footer" style={{ background: "#1a1714", color: "#8a8275", padding: "2rem", textAlign: "center", fontSize: ".83rem" }}>
+    <footer className="site-footer" style={{ background: DARK_BG, color: MUTED_ON_DARK, padding: "2rem", textAlign: "center", fontSize: ".83rem" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: ".5rem" }}>
-        <div><strong style={{ color: "#c9bfaf" }}>BLACKBOX</strong>: AI Agent Accountability and Compliance</div>
+        <div><strong style={{ color: TEXT_ON_DARK }}>BLACKBOX</strong>: AI Agent Accountability and Compliance</div>
         <div>
-          <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" style={{ color: "#a09890", textDecoration: "none" }}>GitHub</a>
+          <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>GitHub</a>
           &nbsp;·&nbsp; MIT licensed &nbsp;·&nbsp;
-          <a href="/login" style={{ color: "#a09890", textDecoration: "none" }}>Dashboard</a>
+          <a href="/login" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Dashboard</a>
           &nbsp;·&nbsp;
-          <a href="/privacy" style={{ color: "#a09890", textDecoration: "none" }}>Privacy</a>
+          <a href="/privacy" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Privacy</a>
           &nbsp;·&nbsp;
-          <a href="/terms" style={{ color: "#a09890", textDecoration: "none" }}>Terms</a>
+          <a href="/terms" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Terms</a>
         </div>
-        <div style={{ fontSize: ".78rem", color: "#5a524a", marginTop: ".25rem" }}>
+        <div style={{ fontSize: ".78rem", color: MUTED_ON_DARK, marginTop: ".25rem" }}>
           Bursa, Türkiye
         </div>
-        <div style={{ fontSize: ".78rem", color: "#5a524a" }}>
+        <div style={{ fontSize: ".78rem", color: MUTED_ON_DARK }}>
           Not legal advice. BLACKBOX is a technical tool, consult qualified counsel for regulatory guidance.
         </div>
       </div>
