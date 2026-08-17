@@ -15,6 +15,7 @@ export default function BillingPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [busy, setBusy] = useState<"" | "checkout" | "portal">("");
   const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -26,6 +27,7 @@ export default function BillingPage() {
       setPlan(p);
       setUsage(u);
     } catch (e) { setErr(String(e)); }
+    finally { setLoading(false); }
   }, [token]);
   useEffect(() => { refresh(); }, [refresh]);
   useEffect(() => {
@@ -65,33 +67,37 @@ export default function BillingPage() {
         </p>
 
         <div className="card" style={{ marginTop: 18, padding: 24 }}>
-          <div className="row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-            <span className="label" style={{ margin: 0 }}>Plan</span>
-            <span className="plan-tag">{plan === null ? "checking…" : plan.plan}</span>
-          </div>
-
-          {usage && (
-            <div style={{ marginBottom: isPro ? 20 : 0 }}>
-              <div className="label" style={{ marginBottom: 6 }}>
-                Hosted tribunal audits this month: {usage.hosted_audits_used} / {usage.limit}
+          {loading ? <p className="empty">Loading your plan…</p> : (
+            <>
+              <div className="row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <span className="label" style={{ margin: 0 }}>Plan</span>
+                <span className="plan-tag">{plan === null ? "checking…" : plan.plan}</span>
               </div>
-              <div className="meter"><div className="meter-fill" style={{ width: `${pct}%` }} /></div>
-            </div>
-          )}
 
-          <div className="btn-row" style={{ marginTop: 20 }}>
-            {!isPro && (
-              <button className="btn btn-primary" style={{ width: "auto" }} onClick={upgrade} disabled={!email || busy === "checkout"}>
-                {busy === "checkout" ? "Redirecting…" : "Upgrade to Pro"}
-              </button>
-            )}
-            {isPro && (
-              <button className="btn btn-ghost" onClick={manage} disabled={busy === "portal"}>
-                {busy === "portal" ? "Redirecting…" : "Manage subscription"}
-              </button>
-            )}
-          </div>
-          {err && <p className="error">{err}</p>}
+              {usage && (
+                <div style={{ marginBottom: isPro ? 20 : 0 }}>
+                  <div className="label" style={{ marginBottom: 6 }}>
+                    Hosted tribunal audits this month: {usage.hosted_audits_used} / {usage.limit}
+                  </div>
+                  <div className="meter"><div className="meter-fill" style={{ width: `${pct}%` }} /></div>
+                </div>
+              )}
+
+              <div className="btn-row" style={{ marginTop: 20 }}>
+                {!isPro && (
+                  <button className="btn btn-primary" style={{ width: "auto" }} onClick={upgrade} disabled={!email || busy === "checkout"}>
+                    {busy === "checkout" ? "Redirecting…" : "Upgrade to Pro"}
+                  </button>
+                )}
+                {isPro && (
+                  <button className="btn btn-ghost" onClick={manage} disabled={busy === "portal"}>
+                    {busy === "portal" ? "Redirecting…" : "Manage subscription"}
+                  </button>
+                )}
+              </div>
+              {err && <p className="error">{err}</p>}
+            </>
+          )}
         </div>
 
         {!isPro && (

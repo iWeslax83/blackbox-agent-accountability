@@ -12,11 +12,14 @@ export default function KeysPage() {
   const [created, setCreated] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
 
   const refresh = useCallback(async () => {
     if (!token) return;
-    try { setKeys(await apiFetch("/keys", { token })); } catch (e) { setErr(String(e)); }
+    try { setKeys(await apiFetch("/keys", { token })); }
+    catch (e) { setErr(String(e)); }
+    finally { setLoading(false); }
   }, [token]);
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -59,7 +62,7 @@ export default function KeysPage() {
         )}
         {err && <p className="error">{err}</p>}
 
-        {keys.length === 0 ? <p className="empty">No keys yet.</p> : (
+        {loading ? <p className="empty">Loading your API keys…</p> : keys.length === 0 ? <p className="empty">No keys yet.</p> : (
           <ul className="list">
             {keys.map(k => (
               <li key={k.id}>
