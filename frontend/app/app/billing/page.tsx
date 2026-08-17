@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/useSession";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
@@ -9,7 +10,17 @@ type Plan = { plan: "free" | "pro" | string };
 type Usage = { hosted_audits_used: number; limit: number };
 
 export default function BillingPage() {
+  return (
+    <Suspense fallback={null}>
+      <BillingPageInner />
+    </Suspense>
+  );
+}
+
+function BillingPageInner() {
   const { token } = useSession();
+  const searchParams = useSearchParams();
+  const justUpgraded = searchParams.get("upgraded") === "true";
   const [plan, setPlan] = useState<Plan | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -65,6 +76,12 @@ export default function BillingPage() {
           Free runs the offline detector. Pro adds live Claude tribunal audits on our hosted key,
           metered per month, on top of whatever you get from your own BYOK key.
         </p>
+
+        {justUpgraded && (
+          <div className="notice" style={{ borderStyle: "solid", borderColor: "#4caf74", color: "#1a1714", marginBottom: 18 }}>
+            You're now on the Pro plan. Thanks for upgrading.
+          </div>
+        )}
 
         <div className="card" style={{ marginTop: 18, padding: 24 }}>
           {loading ? <p className="empty">Loading your plan…</p> : (

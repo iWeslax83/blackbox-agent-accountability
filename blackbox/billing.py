@@ -21,6 +21,17 @@ def _store_id() -> str:
 def create_checkout_session(org_id: str, user_email: str) -> str:
     """Create a hosted LemonSqueezy checkout, stamped with org_id so the webhook
     can attribute the resulting subscription back to the org without a lookup table."""
+    attributes: dict = {
+        "checkout_data": {
+            "email": user_email,
+            "custom": {"org_id": org_id},
+        },
+    }
+    frontend_origin = os.environ.get("FRONTEND_ORIGIN", "")
+    if frontend_origin:
+        attributes["product_options"] = {
+            "redirect_url": f"{frontend_origin}/app/billing?upgraded=true",
+        }
     resp = httpx.post(
         f"{API_BASE}/checkouts",
         headers={
@@ -31,12 +42,7 @@ def create_checkout_session(org_id: str, user_email: str) -> str:
         json={
             "data": {
                 "type": "checkouts",
-                "attributes": {
-                    "checkout_data": {
-                        "email": user_email,
-                        "custom": {"org_id": org_id},
-                    },
-                },
+                "attributes": attributes,
                 "relationships": {
                     "store": {"data": {"type": "stores", "id": _store_id()}},
                     "variant": {"data": {"type": "variants", "id": PRO_VARIANT_ID}},
