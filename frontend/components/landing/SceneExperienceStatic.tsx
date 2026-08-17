@@ -11,7 +11,7 @@ import LandingInteractionStyles from "./dark/LandingInteractionStyles";
 import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, ACCENT_TEXT } from "@/lib/landingTheme";
 import { landingFont } from "@/lib/landingFont";
 
-function FadeInSection({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function FadeInSection({ children, style, id }: { children: React.ReactNode; style?: React.CSSProperties; id?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -31,6 +31,7 @@ function FadeInSection({ children, style }: { children: React.ReactNode; style?:
   return (
     <div
       ref={ref}
+      id={id}
       style={{
         opacity: visible ? 1 : 0,
         transition: "opacity 250ms ease-out",
@@ -47,7 +48,7 @@ export default function SceneExperienceStatic() {
     <main className={landingFont.className} style={{ background: DARK_BG, color: TEXT_ON_DARK, lineHeight: 1.6 }}>
       <LandingInteractionStyles />
 
-      <FadeInSection style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 1.5rem" }}>
+      <FadeInSection id="opening" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 1.5rem" }}>
         <div style={{
           display: "inline-flex", alignItems: "center", width: "fit-content",
           border: "1px solid #2a2723", borderRadius: 4,
@@ -82,7 +83,7 @@ export default function SceneExperienceStatic() {
         <HashChainStatic />
       </FadeInSection>
 
-      <FadeInSection style={{ padding: "4rem 1.5rem", textAlign: "center" }}>
+      <FadeInSection id="problem" style={{ padding: "4rem 1.5rem", textAlign: "center" }}>
         <h2 style={{ fontSize: "1.8rem", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: "1rem" }}>
           The EU AI Act is already in force. Your logs are not evidence.
         </h2>
@@ -91,7 +92,7 @@ export default function SceneExperienceStatic() {
         </p>
       </FadeInSection>
 
-      <FadeInSection style={{ padding: "4rem 1.5rem" }}>
+      <FadeInSection id="recorder" style={{ padding: "4rem 1.5rem" }}>
         <h2 style={{ fontSize: "1.8rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem" }}>
           Every action, chained. A multi-agent panel, flagging violations.
         </h2>
@@ -100,7 +101,7 @@ export default function SceneExperienceStatic() {
         </p>
       </FadeInSection>
 
-      <FadeInSection style={{ padding: "4rem 1.5rem" }}>
+      <FadeInSection id="evidence-pack" style={{ padding: "4rem 1.5rem" }}>
         <h2 style={{ fontSize: "1.8rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem" }}>
           One click. A regulator-ready evidence pack.
         </h2>
@@ -109,12 +110,14 @@ export default function SceneExperienceStatic() {
         </p>
       </FadeInSection>
 
-      <FadeInSection style={{ padding: "4rem 1.5rem" }}>
+      <FadeInSection id="pricing" style={{ padding: "4rem 1.5rem" }}>
         <PricingZigzag />
       </FadeInSection>
 
-      <Cta />
-      <Footer />
+      <div id="cta-footer">
+        <Cta />
+        <Footer />
+      </div>
       <StickyMobileCta />
     </main>
   );
