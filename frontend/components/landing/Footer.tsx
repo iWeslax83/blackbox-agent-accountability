@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer style={{ background: "#1a1714", color: "#8a8275", padding: "2rem", textAlign: "center", fontSize: ".83rem" }}>
+    <footer className="site-footer" style={{ background: "#1a1714", color: "#8a8275", padding: "2rem", textAlign: "center", fontSize: ".83rem" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: ".5rem" }}>
         <div><strong style={{ color: "#c9bfaf" }}>BLACKBOX</strong>: AI Agent Accountability and Compliance</div>
         <div>
@@ -19,6 +19,11 @@ export default function Footer() {
           Not legal advice. BLACKBOX is a technical tool, consult qualified counsel for regulatory guidance.
         </div>
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .site-footer { padding-bottom: calc(2rem + 64px); }
+        }
+      `}</style>
     </footer>
   );
 }

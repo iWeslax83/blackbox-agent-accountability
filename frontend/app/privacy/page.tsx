@@ -1,5 +1,6 @@
 // frontend/app/privacy/page.tsx
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy: BLACKBOX",
@@ -14,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <main style={{ background: "#f4efe6", color: "#1a1714", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh" }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "4rem 2rem 6rem" }}>
-        <a href="/" style={{ color: "#b4451f", fontSize: ".9rem", fontWeight: 600, textDecoration: "none" }}>&larr; Back to homepage</a>
+        <Link href="/" style={{ color: "#b4451f", fontSize: ".9rem", fontWeight: 600, textDecoration: "none" }}>&larr; Back to homepage</Link>
         <h1 style={{ fontSize: "2.2rem", fontWeight: 800, letterSpacing: "-.02em", margin: "1.5rem 0 .5rem" }}>Privacy Policy</h1>
         <p style={{ color: "#8a8275", fontSize: ".9rem", marginBottom: "2.5rem" }}>
           Last updated 2026-08-17. This is a technical description of our current data practices, not legal advice. If you need a legal opinion on this policy, consult qualified counsel.
@@ -28,9 +29,9 @@ export default function PrivacyPage() {
         </section>
 
         <section style={sectionStyle}>
-          <h2 style={headingStyle}>What we don't collect</h2>
+          <h2 style={headingStyle}>What we don&apos;t collect</h2>
           <p style={bodyStyle}>
-            We don't store your payment card details. Billing is handled by LemonSqueezy, our merchant of record; LemonSqueezy processes and stores payment information under their own privacy policy.
+            We don&apos;t store your payment card details. Billing is handled by LemonSqueezy, our merchant of record; LemonSqueezy processes and stores payment information under their own privacy policy.
           </p>
         </section>
 

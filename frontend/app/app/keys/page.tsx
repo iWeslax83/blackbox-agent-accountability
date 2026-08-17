@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/useSession";
 import { apiFetch } from "@/lib/api";
 import TopNav from "@/components/TopNav";
@@ -7,13 +8,16 @@ import TopNav from "@/components/TopNav";
 type ApiKey = { id: number; name: string; prefix: string; revoked_at: string | null };
 
 export default function KeysPage() {
-  const { token } = useSession();
+  const { token, loading: sessionLoading } = useSession();
+  const router = useRouter();
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [created, setCreated] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+  useEffect(() => { if (!sessionLoading && !token) router.push("/login"); }, [sessionLoading, token, router]);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -57,7 +61,7 @@ export default function KeysPage() {
 
         {created && (
           <div className="notice">
-            Copy this now — it’s shown only once:&nbsp;<span className="code">{created}</span>
+            Copy this now, it’s shown only once:&nbsp;<span className="code">{created}</span>
           </div>
         )}
         {err && <p className="error">{err}</p>}

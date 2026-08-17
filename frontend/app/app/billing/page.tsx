@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "@/lib/useSession";
 import { apiFetch } from "@/lib/api";
 import { getSupabase } from "@/lib/supabase";
@@ -18,7 +18,8 @@ export default function BillingPage() {
 }
 
 function BillingPageInner() {
-  const { token } = useSession();
+  const { token, loading: sessionLoading } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const justUpgraded = searchParams.get("upgraded") === "true";
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -27,6 +28,9 @@ function BillingPageInner() {
   const [busy, setBusy] = useState<"" | "checkout" | "portal">("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => { if (!sessionLoading && !token) router.push("/login"); }, [sessionLoading, token, router]);
+  useEffect(() => { if (justUpgraded) router.replace("/app/billing"); }, [justUpgraded, router]);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -79,7 +83,7 @@ function BillingPageInner() {
 
         {justUpgraded && (
           <div className="notice" style={{ borderStyle: "solid", borderColor: "#4caf74", color: "#1a1714", marginBottom: 18 }}>
-            You're now on the Pro plan. Thanks for upgrading.
+            Thanks for upgrading. Your plan will update in a moment.
           </div>
         )}
 
@@ -88,7 +92,7 @@ function BillingPageInner() {
             <>
               <div className="row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
                 <span className="label" style={{ margin: 0 }}>Plan</span>
-                <span className="plan-tag">{plan === null ? "checking…" : plan.plan}</span>
+                <span className="plan-tag">{plan === null ? (err ? "unknown" : "checking…") : plan.plan}</span>
               </div>
 
               {usage && (

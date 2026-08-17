@@ -55,7 +55,8 @@ export default function OpengraphImage() {
             lineHeight: 1.1,
             color: "#1a1714",
             maxWidth: 900,
-            display: "contents",
+            display: "flex",
+            flexWrap: "wrap",
           }}
         >
           Prove what your <span style={{ color: "#b4451f" }}>AI agents</span> did.

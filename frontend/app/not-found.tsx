@@ -1,4 +1,9 @@
 // frontend/app/not-found.tsx
+import type { Metadata } from "next";
+import Link from "next/link";
+
+export const metadata: Metadata = { title: "Page not found: BLACKBOX" };
+
 export default function NotFound() {
   return (
     <main
@@ -36,10 +41,10 @@ export default function NotFound() {
         Page not found
       </h1>
       <p style={{ color: "#8a8275", maxWidth: 420, margin: 0 }}>
-        The page you're looking for doesn't exist or has moved. Check the URL, or head back to
+        The page you&apos;re looking for doesn&apos;t exist or has moved. Check the URL, or head back to
         the homepage.
       </p>
-      <a
+      <Link
         href="/"
         style={{
           marginTop: 8,
@@ -55,7 +60,7 @@ export default function NotFound() {
         }}
       >
         Back to homepage
-      </a>
+      </Link>
     </main>
   );
 }
