@@ -1,3 +1,5 @@
+import { DARK_BG, ACCENT_FILL, BORDER_ON_DARK } from "@/lib/landingTheme";
+
 export default function StickyMobileCta() {
   return (
     <div
@@ -8,14 +10,15 @@ export default function StickyMobileCta() {
         left: 0,
         right: 0,
         zIndex: 40,
-        background: "#f4efe6",
-        borderTop: "1px solid #e3dccd",
+        background: DARK_BG,
+        borderTop: `1px solid ${BORDER_ON_DARK}`,
         padding: "0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))",
         display: "none",
       }}
     >
       <a
         href="/login"
+        className="landing-btn"
         style={{
           display: "block",
           textAlign: "center",
@@ -24,7 +27,7 @@ export default function StickyMobileCta() {
           borderRadius: 8,
           fontSize: ".95rem",
           fontWeight: 600,
-          background: "#b4451f",
+          background: ACCENT_FILL,
           color: "#fff",
           textDecoration: "none",
         }}

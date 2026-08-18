@@ -1,9 +1,10 @@
 // frontend/components/landing/HashChainStatic.tsx
 import { buildChainBlocks } from "@/lib/chainData";
+import { ACCENT_FILL, BORDER_ON_DARK } from "@/lib/landingTheme";
 
-const RUST = "#b4451f";
-const INK = "#1a1714";
-const LINE = "#c9bfaf";
+const RUST = ACCENT_FILL;
+const INK = BORDER_ON_DARK;
+const LINE = BORDER_ON_DARK;
 
 export default function HashChainStatic() {
   const blocks = buildChainBlocks(6);
