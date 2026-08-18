@@ -14,7 +14,7 @@ import PricingZigzag from "./PricingZigzag";
 import Cta from "./Cta";
 import Footer from "./Footer";
 import { TOTAL_PAGES } from "@/lib/sceneProgress";
-import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, ACCENT_TEXT } from "@/lib/landingTheme";
+import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, ACCENT_TEXT, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
 import { landingFont } from "@/lib/landingFont";
 
 const sceneTextStyle: React.CSSProperties = {
@@ -52,7 +52,7 @@ export default function SceneExperience() {
               <section id="opening" style={{ ...sceneTextStyle, maxWidth: 600 }}>
                 <div style={{
                   display: "inline-flex", alignItems: "center", width: "fit-content",
-                  border: "1px solid #2a2723", borderRadius: 4,
+                  border: `1px solid ${BORDER_ON_DARK}`, borderRadius: 4,
                   padding: ".3rem .75rem", marginBottom: "1.6rem",
                   fontSize: ".78rem", fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase",
                   color: ACCENT_TEXT,
@@ -62,7 +62,7 @@ export default function SceneExperience() {
                 <h1 style={{ fontSize: "clamp(2.6rem, 6vw, 4.2rem)", fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1.05, marginBottom: "1.2rem" }}>
                   Prove what your <span style={{ color: ACCENT_TEXT }}>AI agents</span> did.
                 </h1>
-                <p style={{ fontSize: "1.1rem", color: "#a89c8e", lineHeight: 1.55, marginBottom: "2rem" }}>
+                <p style={{ fontSize: "1.1rem", color: MUTED_ON_DARK, lineHeight: 1.55, marginBottom: "2rem" }}>
                   A flight recorder and autonomous compliance tribunal for AI agents. Tamper-evident logs, regulator-ready evidence packs.
                 </p>
                 <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
@@ -76,7 +76,7 @@ export default function SceneExperience() {
                   <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
                     display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
                     borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
-                    background: "transparent", color: TEXT_ON_DARK, border: "1.5px solid #2a2723", textDecoration: "none",
+                    background: "transparent", color: TEXT_ON_DARK, border: `1.5px solid ${BORDER_ON_DARK}`, textDecoration: "none",
                   }}>
                     View on GitHub
                   </a>
@@ -87,7 +87,7 @@ export default function SceneExperience() {
                 <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, marginBottom: "1rem", maxWidth: 700 }}>
                   The EU AI Act is already in force. Your logs are not evidence.
                 </h2>
-                <p style={{ fontSize: "1.05rem", color: "#a89c8e", maxWidth: 560 }}>
+                <p style={{ fontSize: "1.05rem", color: MUTED_ON_DARK, maxWidth: 560 }}>
                   Mandatory logging and traceability requirements are enforceable now. Generic observability tools show traces for debugging, not adjudication.
                 </p>
               </section>
@@ -96,7 +96,7 @@ export default function SceneExperience() {
                 <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem", maxWidth: 520 }}>
                   Every action, chained.
                 </h2>
-                <p style={{ fontSize: "1.05rem", color: "#a89c8e", maxWidth: 480 }}>
+                <p style={{ fontSize: "1.05rem", color: MUTED_ON_DARK, maxWidth: 480 }}>
                   Every agent action is appended to a SHA-256 hash-chained log. A silent edit breaks the chain immediately.
                 </p>
               </section>
@@ -105,7 +105,7 @@ export default function SceneExperience() {
                 <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem", maxWidth: 520 }}>
                   A multi-agent panel, flagging violations.
                 </h2>
-                <p style={{ fontSize: "1.05rem", color: "#a89c8e", maxWidth: 480 }}>
+                <p style={{ fontSize: "1.05rem", color: MUTED_ON_DARK, maxWidth: 480 }}>
                   An autonomous tribunal audits the full log against a structured EU AI Act policy pack, citing evidence and confidence for every flag.
                 </p>
               </section>
@@ -114,7 +114,7 @@ export default function SceneExperience() {
                 <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem", maxWidth: 560 }}>
                   One click. A regulator-ready evidence pack.
                 </h2>
-                <p style={{ fontSize: "1.05rem", color: "#a89c8e", maxWidth: 480 }}>
+                <p style={{ fontSize: "1.05rem", color: MUTED_ON_DARK, maxWidth: 480 }}>
                   Incident summary, violation table, full action log, and chain-integrity status, formatted for regulators.
                 </p>
               </section>

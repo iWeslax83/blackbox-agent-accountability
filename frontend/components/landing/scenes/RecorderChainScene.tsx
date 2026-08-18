@@ -6,7 +6,7 @@ import type { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useScroll } from "@react-three/drei";
 import { buildChainBlocks } from "@/lib/chainData";
-import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH } from "@/lib/sceneProgress";
+import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH, TOTAL_PAGES } from "@/lib/sceneProgress";
 import ChainBlocksGroup from "./ChainBlocksGroup";
 
 const blocks = buildChainBlocks(12);
@@ -18,7 +18,8 @@ export default function RecorderChainScene({ sceneIndex }: { sceneIndex: number 
 
   useFrame(() => {
     if (!groupRef.current) return;
-    const local = getSceneLocalProgress(scroll.offset, SCENE_COUNT, sceneIndex);
+    const sceneFraction = Math.min(scroll.offset / (SCENE_COUNT / TOTAL_PAGES), 1);
+    const local = getSceneLocalProgress(sceneFraction, SCENE_COUNT, sceneIndex);
     // Camera travels ALONGSIDE this chain (per the spec): translate the
     // whole group's X as local progress advances, rather than rotating it,
     // so it reads as "the camera moves along the chain."

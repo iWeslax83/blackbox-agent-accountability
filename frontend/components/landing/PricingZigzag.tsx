@@ -1,4 +1,4 @@
-import { DARK_SURFACE, BORDER_ON_DARK, ACCENT_FILL, ACCENT_TEXT, TEXT_ON_DARK } from "@/lib/landingTheme";
+import { DARK_SURFACE, BORDER_ON_DARK, ACCENT_FILL, ACCENT_TEXT, TEXT_ON_DARK, MUTED_ON_DARK } from "@/lib/landingTheme";
 
 function Tier({
   eyebrow, price, priceSuffix, description, features, ctaLabel, ctaHref, emphasized, align,
@@ -18,14 +18,14 @@ function Tier({
       padding: "2rem",
       marginBottom: "3rem",
     }}>
-      <div style={{ fontSize: ".78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".07em", color: "#a89c8e", marginBottom: ".5rem" }}>
+      <div style={{ fontSize: ".78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".07em", color: MUTED_ON_DARK, marginBottom: ".5rem" }}>
         {eyebrow}
       </div>
       <div style={{ fontSize: "2.4rem", fontWeight: 900, letterSpacing: "-.03em", color: TEXT_ON_DARK }}>
         {price}
-        {priceSuffix && <sub style={{ fontSize: "1rem", fontWeight: 500, color: "#a89c8e" }}>{priceSuffix}</sub>}
+        {priceSuffix && <sub style={{ fontSize: "1rem", fontWeight: 500, color: MUTED_ON_DARK }}>{priceSuffix}</sub>}
       </div>
-      <p style={{ fontSize: ".9rem", color: "#a89c8e", margin: ".6rem 0 1.4rem" }}>{description}</p>
+      <p style={{ fontSize: ".9rem", color: MUTED_ON_DARK, margin: ".6rem 0 1.4rem" }}>{description}</p>
       <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.6rem" }}>
         {features.map((f) => (
           <li key={f} style={{ fontSize: ".875rem", padding: ".35rem 0", borderBottom: `1px solid ${BORDER_ON_DARK}`, display: "flex", gap: ".5rem", color: TEXT_ON_DARK }}>

@@ -4,7 +4,7 @@ import { useRef } from "react";
 import type { Group, Mesh, MeshStandardMaterial } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useScroll } from "@react-three/drei";
-import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH } from "@/lib/sceneProgress";
+import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH, TOTAL_PAGES } from "@/lib/sceneProgress";
 import { ACCENT_FILL, DARK_SURFACE } from "@/lib/landingTheme";
 
 const NODE_COUNT = 6;
@@ -20,7 +20,8 @@ export default function TribunalScene({ sceneIndex }: { sceneIndex: number }) {
   const worldZ = -sceneIndex * SCENE_DEPTH;
 
   useFrame(() => {
-    const local = getSceneLocalProgress(scroll.offset, SCENE_COUNT, sceneIndex);
+    const sceneFraction = Math.min(scroll.offset / (SCENE_COUNT / TOTAL_PAGES), 1);
+    const local = getSceneLocalProgress(sceneFraction, SCENE_COUNT, sceneIndex);
     // Staggered reveal: each node flips from neutral to accent color one
     // at a time as local progress advances, not all simultaneously.
     meshRefs.current.forEach((mesh, i) => {

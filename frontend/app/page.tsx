@@ -1,7 +1,7 @@
 // frontend/app/page.tsx
 import type { Metadata } from "next";
 import SceneGate from "@/components/landing/SceneGate";
-import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL } from "@/lib/landingTheme";
+import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
 import { landingFont } from "@/lib/landingFont";
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export default function Landing() {
       <nav style={{
         position: "sticky", top: 0, zIndex: 100,
         background: DARK_BG,
-        borderBottom: "1px solid #2a2723",
+        borderBottom: `1px solid ${BORDER_ON_DARK}`,
         padding: "0 2rem",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         height: 58,

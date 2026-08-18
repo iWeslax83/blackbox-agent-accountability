@@ -4,7 +4,7 @@ import { useRef } from "react";
 import type { Mesh, MeshStandardMaterial } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useScroll } from "@react-three/drei";
-import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH, PIN_FRACTION } from "@/lib/sceneProgress";
+import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH, PIN_FRACTION, TOTAL_PAGES } from "@/lib/sceneProgress";
 import { DARK_SURFACE, ACCENT_FILL } from "@/lib/landingTheme";
 
 export default function EvidencePackScene({ sceneIndex }: { sceneIndex: number }) {
@@ -14,7 +14,8 @@ export default function EvidencePackScene({ sceneIndex }: { sceneIndex: number }
 
   useFrame(() => {
     if (!meshRef.current) return;
-    const local = getSceneLocalProgress(scroll.offset, SCENE_COUNT, sceneIndex);
+    const sceneFraction = Math.min(scroll.offset / (SCENE_COUNT / TOTAL_PAGES), 1);
+    const local = getSceneLocalProgress(sceneFraction, SCENE_COUNT, sceneIndex);
     // Assembly happens over the first (1 - PIN_FRACTION) of the scene's range;
     // the remaining PIN_FRACTION is the pinned hold, during which the plane
     // stays fully assembled and lit rather than continuing to animate, giving

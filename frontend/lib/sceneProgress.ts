@@ -1,5 +1,5 @@
 export const SCENE_COUNT = 5;
-export const TOTAL_PAGES = 7;
+export const TOTAL_PAGES = 9;
 export const SCENE_DEPTH = 8;
 export const PIN_SCENE_INDEX = 4;
 export const PIN_FRACTION = 0.4;

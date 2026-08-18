@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { getActiveSceneIndex, getSceneLocalProgress, SCENE_COUNT, TOTAL_PAGES } from "./sceneProgress";
 
 describe("constants", () => {
-  it("defines 5 3D scenes across 7 total scroll pages", () => {
+  it("defines 5 3D scenes across 9 total scroll pages", () => {
     expect(SCENE_COUNT).toBe(5);
-    expect(TOTAL_PAGES).toBe(7);
+    expect(TOTAL_PAGES).toBe(9);
   });
 });
 
