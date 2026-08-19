@@ -5,7 +5,7 @@ import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
-import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH, TOTAL_PAGES } from "@/lib/sceneProgress";
+import { getSceneLocalProgress, isSceneActive, SCENE_COUNT, SCENE_DEPTH, TOTAL_PAGES } from "@/lib/sceneProgress";
 import { ACCENT_TEXT, TEXT_ON_DARK } from "@/lib/landingTheme";
 
 const STATS = [
@@ -32,6 +32,7 @@ export default function ProblemStatsScene({ sceneIndex }: { sceneIndex: number }
     const sceneFraction = Math.min(scroll.offset / (SCENE_COUNT / TOTAL_PAGES), 1);
     const local = getSceneLocalProgress(sceneFraction, SCENE_COUNT, sceneIndex);
     if (groupRef.current) {
+      groupRef.current.visible = isSceneActive(sceneFraction, SCENE_COUNT, sceneIndex);
       groupRef.current.children.forEach((child, i) => {
         const stat = STATS[i];
         if (!stat) return;

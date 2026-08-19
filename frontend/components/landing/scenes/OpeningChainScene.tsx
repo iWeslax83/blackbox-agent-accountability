@@ -6,7 +6,7 @@ import type { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useScroll } from "@react-three/drei";
 import { buildChainBlocks } from "@/lib/chainData";
-import { getSceneLocalProgress, SCENE_COUNT, TOTAL_PAGES } from "@/lib/sceneProgress";
+import { getSceneLocalProgress, isSceneActive, SCENE_COUNT, TOTAL_PAGES } from "@/lib/sceneProgress";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import ChainBlocksGroup from "./ChainBlocksGroup";
 
@@ -20,6 +20,7 @@ export default function OpeningChainScene({ sceneIndex }: { sceneIndex: number }
   useFrame((_, delta) => {
     if (!groupRef.current) return;
     const sceneFraction = Math.min(scroll.offset / (SCENE_COUNT / TOTAL_PAGES), 1);
+    groupRef.current.visible = isSceneActive(sceneFraction, SCENE_COUNT, sceneIndex);
     const local = getSceneLocalProgress(sceneFraction, SCENE_COUNT, sceneIndex);
     // Entrance: fade/scale in over the first 30% of this scene's range.
     // Exit: fade/scale out over the last 30%, per the plan's 150-200ms-equivalent

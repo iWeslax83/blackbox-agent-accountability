@@ -4,12 +4,13 @@ import { useRef } from "react";
 import type { Group, Mesh, MeshStandardMaterial } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useScroll, RoundedBox, Edges } from "@react-three/drei";
-import { getSceneLocalProgress, SCENE_COUNT, SCENE_DEPTH, PIN_FRACTION, TOTAL_PAGES } from "@/lib/sceneProgress";
+import { getSceneLocalProgress, isSceneActive, SCENE_COUNT, SCENE_DEPTH, PIN_FRACTION, TOTAL_PAGES } from "@/lib/sceneProgress";
 import { DARK_SURFACE, ACCENT_FILL, TEXT_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
 
 const SHEET_COUNT = 4;
 
 export default function EvidencePackScene({ sceneIndex }: { sceneIndex: number }) {
+  const outerRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
   const stampRef = useRef<Mesh>(null);
   const stampRingRef = useRef<Mesh>(null);
@@ -20,6 +21,7 @@ export default function EvidencePackScene({ sceneIndex }: { sceneIndex: number }
   useFrame((_, delta) => {
     if (!groupRef.current) return;
     const sceneFraction = Math.min(scroll.offset / (SCENE_COUNT / TOTAL_PAGES), 1);
+    if (outerRef.current) outerRef.current.visible = isSceneActive(sceneFraction, SCENE_COUNT, sceneIndex);
     const local = getSceneLocalProgress(sceneFraction, SCENE_COUNT, sceneIndex);
     // Assembly happens over the first (1 - PIN_FRACTION) of the scene's range;
     // the remaining PIN_FRACTION is the pinned hold, during which the stack
@@ -53,7 +55,7 @@ export default function EvidencePackScene({ sceneIndex }: { sceneIndex: number }
   });
 
   return (
-    <group position={[0, 0, worldZ]}>
+    <group ref={outerRef} position={[0, 0, worldZ]}>
       <group ref={groupRef} rotation={[-Math.PI / 2.5, 0, 0]}>
         {/* stacked report sheets: slight offset per sheet reads as a bound
             document, not a single flat card */}
