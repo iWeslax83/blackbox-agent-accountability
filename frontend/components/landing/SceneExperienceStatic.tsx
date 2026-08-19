@@ -80,19 +80,19 @@ export default function SceneExperienceStatic() {
 
       <FadeInSection id="problem" style={{ padding: "4rem 1.5rem", textAlign: "center" }}>
         <h2 style={{ fontSize: "1.8rem", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: "1rem" }}>
-          The EU AI Act is already in force. Your logs are not evidence.
+          The EU AI Act asks for proof, not just logs.
         </h2>
         <p style={{ fontSize: ".95rem", color: MUTED_ON_DARK }}>
-          Mandatory logging and traceability requirements are enforceable now. Generic observability tools show traces for debugging, not adjudication.
+          Debugging traces tell you what an agent did. They don&apos;t tell a regulator whether it was allowed to. TELUVANE closes that gap.
         </p>
       </FadeInSection>
 
       <FadeInSection id="recorder" style={{ padding: "4rem 1.5rem" }}>
         <h2 style={{ fontSize: "1.8rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem" }}>
-          Every action, chained. A multi-agent panel, flagging violations.
+          Every action, chained. A panel of agents reviews it.
         </h2>
         <p style={{ fontSize: ".95rem", color: MUTED_ON_DARK }}>
-          Every agent action is appended to a SHA-256 hash-chained log. An autonomous tribunal audits the full log against a structured EU AI Act policy pack.
+          Every agent action is appended to a SHA-256 hash-chained log. It checks the full log against a structured EU AI Act policy pack and cites evidence for each finding.
         </p>
       </FadeInSection>
 
