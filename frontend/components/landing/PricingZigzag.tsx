@@ -46,13 +46,13 @@ function Tier({
   );
 }
 
-export default function PricingZigzag() {
+export default function PricingZigzag({ headingColor = TEXT_ON_DARK }: { headingColor?: string }) {
   return (
     <div>
       <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: ".6rem" }}>
         Pricing
       </div>
-      <h2 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "2.5rem", color: TEXT_ON_DARK }}>
+      <h2 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "2.5rem", color: headingColor }}>
         Start free. Scale with confidence.
       </h2>
 
@@ -60,7 +60,7 @@ export default function PricingZigzag() {
         align="left"
         eyebrow="Free / Open Source"
         price="$0"
-        description="Self-host on your own infrastructure. MIT licensed."
+        description="Self-host on your own infrastructure. AGPL-3.0 licensed."
         features={["Unlimited agents (self-hosted)", "SHA-256 hash-chained recorder", "EU AI Act policy pack (YAML)", "Tribunal audit CLI", "Evidence pack export (HTML)", "Community support (GitHub)"]}
         ctaLabel="View on GitHub"
         ctaHref="https://github.com/iWeslax83/teluvane"
@@ -69,7 +69,7 @@ export default function PricingZigzag() {
         align="right"
         emphasized
         eyebrow="Pro"
-        price="$49"
+        price="$19.99"
         priceSuffix="/mo"
         description="Managed cloud. Everything you need for a production AI team."
         features={["Up to 10 agents managed", "Hosted dashboard and real-time log", "Automated tribunal runs on schedule", "PDF + HTML evidence pack exports", "Custom policy rules", "Priority email support"]}

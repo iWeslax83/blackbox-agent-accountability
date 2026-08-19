@@ -53,20 +53,11 @@ export default function SceneExperienceStatic() {
       </noscript>
 
       <FadeInSection id="opening" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 1.5rem" }}>
-        <div style={{
-          display: "inline-flex", alignItems: "center", width: "fit-content",
-          border: `1px solid ${BORDER_ON_DARK}`, borderRadius: 4,
-          padding: ".3rem .75rem", marginBottom: "1.4rem",
-          fontSize: ".75rem", fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase",
-          color: ACCENT_TEXT,
-        }}>
-          EU AI Act &middot; Art. 10 / 12 / 14 / 15
-        </div>
         <h1 style={{ fontSize: "clamp(2.2rem, 8vw, 2.8rem)", fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1.08, marginBottom: "1rem" }}>
-          Prove what your <span style={{ color: ACCENT_TEXT }}>AI agents</span> did.
+          Every AI agent action, <span style={{ color: ACCENT_TEXT }}>logged and hash-chained</span>.
         </h1>
         <p style={{ fontSize: "1rem", color: MUTED_ON_DARK, lineHeight: 1.55, marginBottom: "1.5rem" }}>
-          A flight recorder and autonomous compliance tribunal for AI agents. Tamper-evident logs, regulator-ready evidence packs.
+          Tamper one row and the chain breaks visibly. An autonomous tribunal audits the log and exports a regulator-ready evidence pack.
         </p>
         <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginBottom: "2rem" }}>
           <a href="/login" className="landing-btn" style={{
@@ -114,8 +105,10 @@ export default function SceneExperienceStatic() {
         </p>
       </FadeInSection>
 
-      <FadeInSection id="pricing" style={{ padding: "4rem 1.5rem" }}>
-        <PricingZigzag />
+      <FadeInSection id="pricing" style={{ width: "100%", background: TEXT_ON_DARK }}>
+        <div style={{ padding: "4rem 1.5rem" }}>
+          <PricingZigzag headingColor={DARK_BG} />
+        </div>
       </FadeInSection>
 
       <div id="cta-footer">

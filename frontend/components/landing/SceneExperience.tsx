@@ -10,6 +10,7 @@ import RecorderChainScene from "./scenes/RecorderChainScene";
 import TribunalScene from "./scenes/TribunalScene";
 import EvidencePackScene from "./scenes/EvidencePackScene";
 import LandingInteractionStyles from "./dark/LandingInteractionStyles";
+import EvidenceLogCard from "./EvidenceLogCard";
 import PricingZigzag from "./PricingZigzag";
 import Cta from "./Cta";
 import Footer from "./Footer";
@@ -38,8 +39,9 @@ export default function SceneExperience() {
           gl={{ antialias: true, alpha: true }}
           aria-label="An animated sequence of 3D scenes visualizing TELUVANE's hash-chain recorder, compliance tribunal, and evidence pack, synchronized to page scroll"
         >
-          <ambientLight intensity={0.5} />
+          <ambientLight intensity={0.45} />
           <directionalLight position={[3, 4, 5]} intensity={0.8} />
+          <pointLight position={[-4, -2, 3]} intensity={0.35} color={ACCENT_FILL} />
           <ScrollControls pages={TOTAL_PAGES} damping={0.2}>
             <CameraRig />
             <OpeningChainScene sceneIndex={0} />
@@ -49,37 +51,35 @@ export default function SceneExperience() {
             <EvidencePackScene sceneIndex={4} />
 
             <Scroll html style={{ width: "100%" }}>
-              <section id="opening" style={{ ...sceneTextStyle, maxWidth: 600 }}>
-                <div style={{
-                  display: "inline-flex", alignItems: "center", width: "fit-content",
-                  border: `1px solid ${BORDER_ON_DARK}`, borderRadius: 4,
-                  padding: ".3rem .75rem", marginBottom: "1.6rem",
-                  fontSize: ".78rem", fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase",
-                  color: ACCENT_TEXT,
-                }}>
-                  EU AI Act &middot; Art. 10 / 12 / 14 / 15
-                </div>
-                <h1 style={{ fontSize: "clamp(2.6rem, 6vw, 4.2rem)", fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1.05, marginBottom: "1.2rem" }}>
-                  Prove what your <span style={{ color: ACCENT_TEXT }}>AI agents</span> did.
-                </h1>
-                <p style={{ fontSize: "1.1rem", color: MUTED_ON_DARK, lineHeight: 1.55, marginBottom: "2rem" }}>
-                  A flight recorder and autonomous compliance tribunal for AI agents. Tamper-evident logs, regulator-ready evidence packs.
-                </p>
-                <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                  <a href="/login" className="landing-btn" style={{
-                    display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
-                    borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
-                    background: ACCENT_FILL, color: "#fff", textDecoration: "none",
-                  }}>
-                    Get started free
-                  </a>
-                  <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
-                    display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
-                    borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
-                    background: "transparent", color: TEXT_ON_DARK, border: `1.5px solid ${BORDER_ON_DARK}`, textDecoration: "none",
-                  }}>
-                    View on GitHub
-                  </a>
+              <section id="opening" style={{ ...sceneTextStyle, maxWidth: 1400 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "3rem", alignItems: "center" }}>
+                  <div style={{ flex: "1 1 460px", maxWidth: 600 }}>
+                    <h1 style={{ fontSize: "clamp(2.6rem, 6vw, 4.2rem)", fontWeight: 900, letterSpacing: "-.03em", lineHeight: 1.05, marginBottom: "1.2rem" }}>
+                      Every AI agent action, <span style={{ color: ACCENT_TEXT }}>logged and hash-chained</span>.
+                    </h1>
+                    <p style={{ fontSize: "1.1rem", color: MUTED_ON_DARK, lineHeight: 1.55, marginBottom: "2rem" }}>
+                      Tamper one row and the chain breaks visibly. An autonomous tribunal audits the log and exports a regulator-ready evidence pack.
+                    </p>
+                    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                      <a href="/login" className="landing-btn" style={{
+                        display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
+                        borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
+                        background: ACCENT_FILL, color: "#fff", textDecoration: "none",
+                      }}>
+                        Get started free
+                      </a>
+                      <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
+                        display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
+                        borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
+                        background: "transparent", color: TEXT_ON_DARK, border: `1.5px solid ${BORDER_ON_DARK}`, textDecoration: "none",
+                      }}>
+                        View on GitHub
+                      </a>
+                    </div>
+                  </div>
+                  <div style={{ flex: "1 1 320px", display: "flex", justifyContent: "center" }}>
+                    <EvidenceLogCard />
+                  </div>
                 </div>
               </section>
 
@@ -119,8 +119,10 @@ export default function SceneExperience() {
                 </p>
               </section>
 
-              <section id="pricing" style={{ padding: "6rem 2rem", maxWidth: 1400, margin: "0 auto" }}>
-                <PricingZigzag />
+              <section id="pricing" style={{ width: "100%", background: TEXT_ON_DARK }}>
+                <div style={{ padding: "6rem 2rem", maxWidth: 1400, margin: "0 auto" }}>
+                  <PricingZigzag headingColor={DARK_BG} />
+                </div>
               </section>
 
               <section id="cta-footer" style={{ maxWidth: 1400, margin: "0 auto" }}>
