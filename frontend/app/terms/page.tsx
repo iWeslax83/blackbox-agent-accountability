@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service: BLACKBOX",
-  description: "The terms governing your use of BLACKBOX.",
+  title: "Terms of Service: TELUVANE",
+  description: "The terms governing your use of TELUVANE.",
 };
 
 const sectionStyle: React.CSSProperties = { marginBottom: "2rem" };
@@ -24,7 +24,7 @@ export default function TermsPage() {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>The service</h2>
           <p style={bodyStyle}>
-            BLACKBOX is a flight recorder and compliance tribunal for AI agent actions. The core recorder and audit engine are open source (MIT licensed) and can be self-hosted for free. We also offer a hosted Pro plan with a managed dashboard, scheduled audits, and priority support.
+            TELUVANE is a flight recorder and compliance tribunal for AI agent actions. The core recorder and audit engine are open source (MIT licensed) and can be self-hosted for free. We also offer a hosted Pro plan with a managed dashboard, scheduled audits, and priority support.
           </p>
         </section>
 
@@ -38,7 +38,7 @@ export default function TermsPage() {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>Acceptable use</h2>
           <p style={bodyStyle}>
-            Don&apos;t use BLACKBOX to process data you don&apos;t have the right to process, or to circumvent the usage limits of your plan. We reserve the right to suspend accounts that abuse the service.
+            Don&apos;t use TELUVANE to process data you don&apos;t have the right to process, or to circumvent the usage limits of your plan. We reserve the right to suspend accounts that abuse the service.
           </p>
         </section>
 
@@ -52,7 +52,7 @@ export default function TermsPage() {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>No warranty</h2>
           <p style={bodyStyle}>
-            BLACKBOX is a technical tool, not legal advice, and does not guarantee regulatory compliance with the EU AI Act or any other framework. The service is provided &quot;as is,&quot; without warranty of any kind, to the maximum extent permitted by law.
+            TELUVANE is a technical tool, not legal advice, and does not guarantee regulatory compliance with the EU AI Act or any other framework. The service is provided &quot;as is,&quot; without warranty of any kind, to the maximum extent permitted by law.
           </p>
         </section>
 
@@ -66,9 +66,9 @@ export default function TermsPage() {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>Contact</h2>
           <p style={bodyStyle}>
-            BLACKBOX is an open-source project (MIT licensed) based in Bursa, Türkiye. For questions about these terms, open an issue at{" "}
-            <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" style={{ color: "#b4451f" }}>
-              github.com/iWeslax83/blackbox-agent-accountability
+            TELUVANE is an open-source project (MIT licensed) based in Bursa, Türkiye. For questions about these terms, open an issue at{" "}
+            <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" style={{ color: "#b4451f" }}>
+              github.com/iWeslax83/teluvane
             </a>.
           </p>
         </section>

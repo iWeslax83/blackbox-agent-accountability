@@ -1,14 +1,14 @@
 import os
 os.environ.setdefault(
     "DATABASE_URL",
-    os.environ.get("TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/blackbox_test"),
+    os.environ.get("TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/teluvane_test"),
 )
 os.environ.setdefault("SUPABASE_JWT_SECRET", "test-secret")
-os.environ.setdefault("BLACKBOX_SECRET_KEY", "BDUpLFAo9s1dqKy3BZFUcEvdGA7sS0rgdpUEe3Yai8I=")
+os.environ.setdefault("TELUVANE_SECRET_KEY", "BDUpLFAo9s1dqKy3BZFUcEvdGA7sS0rgdpUEe3Yai8I=")
 import pytest
-from blackbox.db import get_pool
-from blackbox.migrate import apply_migrations
-from blackbox.store import Store
+from teluvane.db import get_pool
+from teluvane.migrate import apply_migrations
+from teluvane.store import Store
 
 @pytest.fixture(scope="session", autouse=True)
 def _migrate():

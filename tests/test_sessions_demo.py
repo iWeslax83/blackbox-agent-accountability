@@ -1,14 +1,14 @@
 import os, time
 os.environ.setdefault("DATABASE_URL",
-    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/blackbox_test"))
+    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/teluvane_test"))
 os.environ.setdefault("SUPABASE_JWT_SECRET", "test-secret")
-os.environ.setdefault("BLACKBOX_SECRET_KEY", "BDUpLFAo9s1dqKy3BZFUcEvdGA7sS0rgdpUEe3Yai8I=")
+os.environ.setdefault("TELUVANE_SECRET_KEY", "BDUpLFAo9s1dqKy3BZFUcEvdGA7sS0rgdpUEe3Yai8I=")
 import jwt, pytest
 from fastapi.testclient import TestClient
-from blackbox.migrate import apply_migrations
-from blackbox.db import get_pool
-from blackbox.orgs import create_org
-from blackbox.apikeys import create_api_key
+from teluvane.migrate import apply_migrations
+from teluvane.db import get_pool
+from teluvane.orgs import create_org
+from teluvane.apikeys import create_api_key
 
 @pytest.fixture(autouse=True)
 def _clean_db():
@@ -19,7 +19,7 @@ def _clean_db():
 
 @pytest.fixture
 def client():
-    from blackbox.ingest import app
+    from teluvane.ingest import app
     return TestClient(app)
 
 def _jwt(user_id):
@@ -30,8 +30,8 @@ def _jwt(user_id):
 def test_sessions_lists_org_sessions(client):
     # Seed via the Store directly so the test does not depend on the /events rate limit
     # (other test modules mutate EVENTS_RATE_LIMIT, which would otherwise 429 these posts).
-    from blackbox.store import Store
-    from blackbox.schema import Event
+    from teluvane.store import Store
+    from teluvane.schema import Event
     org = create_org("Acme", "u1")
     s = Store()
     for sid in ("s-a", "s-a", "s-b"):

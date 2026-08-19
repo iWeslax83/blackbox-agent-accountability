@@ -97,7 +97,7 @@ export default function AppPage() {
             ))}
           </ul>
         )}
-        {sessions.length === 0 && <p className="empty">No sessions yet — click “Load demo session” to see BLACKBOX in action, or point your agent at the API.</p>}
+        {sessions.length === 0 && <p className="empty">No sessions yet — click “Load demo session” to see TELUVANE in action, or point your agent at the API.</p>}
 
         {err && <p className="error">{err}</p>}
 

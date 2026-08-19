@@ -1,4 +1,4 @@
-# blackbox/policies/eu_ai_act.yaml
+# teluvane/policies/eu_ai_act.yaml
 framework: "EU AI Act"
 version: "2026-draft"
 rules:

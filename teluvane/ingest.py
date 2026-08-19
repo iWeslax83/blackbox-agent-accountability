@@ -1,4 +1,4 @@
-# blackbox/blackbox/ingest.py
+# teluvane/teluvane/ingest.py
 import logging
 import os
 from fastapi import FastAPI, Depends, Body, Header, HTTPException, Request, Response
@@ -22,7 +22,7 @@ from .usage import (HOSTED_AUDIT_MONTHLY_LIMIT, hosted_audit_count,
                      increment_hosted_audit_usage, under_hosted_audit_limit)
 
 store = Store()
-app = FastAPI(title="BLACKBOX")
+app = FastAPI(title="TELUVANE")
 _origins = [o for o in os.environ.get("FRONTEND_ORIGIN", "").split(",") if o] or ["*"]
 app.add_middleware(CORSMiddleware, allow_origins=_origins,
                    allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
@@ -35,7 +35,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 EVENTS_RATE_LIMIT = os.environ.get("EVENTS_RATE_LIMIT", "120/minute")
 AUDIT_RATE_LIMIT = os.environ.get("AUDIT_RATE_LIMIT", "20/minute")
 
-POLICY_PATH = os.environ.get("BLACKBOX_POLICY", "policies/eu_ai_act.yaml")
+POLICY_PATH = os.environ.get("TELUVANE_POLICY", "policies/eu_ai_act.yaml")
 _pack = load_policy_pack(POLICY_PATH)
 
 # ---- health / readiness (no auth) ----------------------------------------------------------
@@ -84,7 +84,7 @@ def audit_session(request: Request, session_id: str, org_id: str = Depends(curre
     if not api_key and org_plan(org_id) == "pro" and under_hosted_audit_limit(org_id):
         # Pro orgs without their own BYOK key ride the hosted key, metered per calendar
         # month so a runaway org can't spend unbounded amounts of our Anthropic budget.
-        api_key = os.environ.get("BLACKBOX_HOSTED_ANTHROPIC_KEY")
+        api_key = os.environ.get("TELUVANE_HOSTED_ANTHROPIC_KEY")
         if api_key:
             increment_hosted_audit_usage(org_id)
     return audited_run(store, org_id, session_id, _pack, api_key)   # still None -> offline audit

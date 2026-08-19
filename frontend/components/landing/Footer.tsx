@@ -4,9 +4,9 @@ export default function Footer() {
   return (
     <footer className="site-footer" style={{ background: DARK_BG, color: MUTED_ON_DARK, padding: "2rem", textAlign: "center", fontSize: ".83rem" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: ".5rem" }}>
-        <div><strong style={{ color: TEXT_ON_DARK }}>BLACKBOX</strong>: AI Agent Accountability and Compliance</div>
+        <div><strong style={{ color: TEXT_ON_DARK }}>TELUVANE</strong>: AI Agent Accountability and Compliance</div>
         <div>
-          <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>GitHub</a>
+          <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>GitHub</a>
           &nbsp;·&nbsp; MIT licensed &nbsp;·&nbsp;
           <a href="/login" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Dashboard</a>
           &nbsp;·&nbsp;
@@ -18,7 +18,7 @@ export default function Footer() {
           Bursa, Türkiye
         </div>
         <div style={{ fontSize: ".78rem", color: MUTED_ON_DARK }}>
-          Not legal advice. BLACKBOX is a technical tool, consult qualified counsel for regulatory guidance.
+          Not legal advice. TELUVANE is a technical tool, consult qualified counsel for regulatory guidance.
         </div>
       </div>
       <style>{`

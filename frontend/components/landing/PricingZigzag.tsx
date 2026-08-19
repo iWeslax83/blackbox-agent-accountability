@@ -63,7 +63,7 @@ export default function PricingZigzag() {
         description="Self-host on your own infrastructure. MIT licensed."
         features={["Unlimited agents (self-hosted)", "SHA-256 hash-chained recorder", "EU AI Act policy pack (YAML)", "Tribunal audit CLI", "Evidence pack export (HTML)", "Community support (GitHub)"]}
         ctaLabel="View on GitHub"
-        ctaHref="https://github.com/iWeslax83/blackbox-agent-accountability"
+        ctaHref="https://github.com/iWeslax83/teluvane"
       />
       <Tier
         align="right"

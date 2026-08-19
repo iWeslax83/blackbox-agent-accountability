@@ -1,4 +1,4 @@
-# blackbox/blackbox/tribunal.py
+# teluvane/teluvane/tribunal.py
 import json, os
 from collections import defaultdict
 from operator import add

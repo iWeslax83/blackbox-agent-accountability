@@ -1,16 +1,16 @@
 import os
 os.environ.setdefault("DATABASE_URL",
-    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/blackbox_test"))
+    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/teluvane_test"))
 os.environ.setdefault("SUPABASE_JWT_SECRET", "test-secret")
-os.environ.setdefault("BLACKBOX_SECRET_KEY", "BDUpLFAo9s1dqKy3BZFUcEvdGA7sS0rgdpUEe3Yai8I=")
+os.environ.setdefault("TELUVANE_SECRET_KEY", "BDUpLFAo9s1dqKy3BZFUcEvdGA7sS0rgdpUEe3Yai8I=")
 os.environ["EVENTS_RATE_LIMIT"] = "3/minute"
-import importlib, blackbox.ingest as ing
+import importlib, teluvane.ingest as ing
 importlib.reload(ing)
 from fastapi.testclient import TestClient
-from blackbox.migrate import apply_migrations
-from blackbox.orgs import create_org
-from blackbox.apikeys import create_api_key
-from blackbox.db import get_pool
+from teluvane.migrate import apply_migrations
+from teluvane.orgs import create_org
+from teluvane.apikeys import create_api_key
+from teluvane.db import get_pool
 
 def _clean():
     apply_migrations()

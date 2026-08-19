@@ -1,8 +1,8 @@
 import pytest
-from blackbox.crypto import encrypt, decrypt
-from blackbox.byok import set_byok, get_byok, clear_byok, has_byok
-from blackbox.orgs import create_org
-from blackbox.db import get_pool
+from teluvane.crypto import encrypt, decrypt
+from teluvane.byok import set_byok, get_byok, clear_byok, has_byok
+from teluvane.orgs import create_org
+from teluvane.db import get_pool
 
 def test_encrypt_roundtrip():
     ct = encrypt("sk-ant-secret123")
@@ -11,7 +11,7 @@ def test_encrypt_roundtrip():
 
 def test_wrong_key_cannot_decrypt(monkeypatch):
     ct = encrypt("sk-ant-secret123")
-    monkeypatch.setenv("BLACKBOX_SECRET_KEY", "ffqFvOwEiqCI8OeEdc_XU2ot3BR-Sf_oA2N2hhQlylM=")
+    monkeypatch.setenv("TELUVANE_SECRET_KEY", "ffqFvOwEiqCI8OeEdc_XU2ot3BR-Sf_oA2N2hhQlylM=")
     with pytest.raises(Exception):
         decrypt(ct)
 

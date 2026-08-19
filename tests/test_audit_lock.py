@@ -1,9 +1,9 @@
 import threading, time
-from blackbox.auditlock import audited_run
-from blackbox.store import Store
-from blackbox.schema import Event, Verdict
-from blackbox.orgs import create_org
-import blackbox.auditlock as auditlock
+from teluvane.auditlock import audited_run
+from teluvane.store import Store
+from teluvane.schema import Event, Verdict
+from teluvane.orgs import create_org
+import teluvane.auditlock as auditlock
 
 def _seed(store, org, session="s1"):
     store.append(org, Event(agent_id="a", session_id=session, kind="tool_call",

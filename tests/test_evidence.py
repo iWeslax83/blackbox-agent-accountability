@@ -1,6 +1,6 @@
-# blackbox/tests/test_evidence.py
-from blackbox.evidence import build_evidence_pack
-from blackbox.schema import Event, Verdict
+# teluvane/tests/test_evidence.py
+from teluvane.evidence import build_evidence_pack
+from teluvane.schema import Event, Verdict
 
 def test_build_evidence_pack_html_and_json():
     events = [Event(agent_id="d", session_id="s1", kind="tool_call", tool="send_email",

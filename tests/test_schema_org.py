@@ -1,4 +1,4 @@
-from blackbox.schema import Event, Verdict
+from teluvane.schema import Event, Verdict
 
 def test_event_has_optional_org_id_default_none():
     e = Event(agent_id="a", session_id="s", kind="llm_call")

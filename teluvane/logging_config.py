@@ -1,4 +1,4 @@
-# blackbox/blackbox/logging_config.py
+# teluvane/teluvane/logging_config.py
 import logging, json
 from .logging_filter import install_redaction
 

@@ -76,7 +76,7 @@ export default function SceneExperienceStatic() {
           }}>
             Get started free
           </a>
-          <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
+          <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
             display: "inline-flex", alignItems: "center", padding: ".75rem 1.4rem",
             borderRadius: 8, fontSize: ".9rem", fontWeight: 600,
             background: "transparent", color: TEXT_ON_DARK, border: `1.5px solid ${BORDER_ON_DARK}`, textDecoration: "none",

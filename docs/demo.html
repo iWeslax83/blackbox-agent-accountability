@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BLACKBOX — Live Demo</title>
-<meta name="description" content="Fully static interactive demo of BLACKBOX — AI agent accountability and EU AI Act compliance tribunal. Runs entirely in your browser.">
+<title>TELUVANE — Live Demo</title>
+<meta name="description" content="Fully static interactive demo of TELUVANE — AI agent accountability and EU AI Act compliance tribunal. Runs entirely in your browser.">
 <style>
 /* ── Tokens ── */
 :root {
@@ -229,12 +229,12 @@ a:hover { text-decoration: underline; }
 <!-- ── PAGE HEADER ── -->
 <header class="page-header">
   <div class="page-header-brand">
-    🛡 BLACKBOX <span class="demo-pill">Live Demo</span>
+    🛡 TELUVANE <span class="demo-pill">Live Demo</span>
   </div>
   <div class="page-header-note">
     <span>Runs entirely in your browser — no backend. This mirrors the real dashboard.</span>
     <a href="index.html">← Back to landing</a>
-    <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener">GitHub ↗</a>
+    <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
 </header>
 
@@ -496,7 +496,7 @@ function exportEvidence() {
     'footer{margin-top:2rem;font-size:.78rem;color:#8a8275;text-align:center}' +
     '</style></head><body>' +
     '<h1>🛡 Compliance Evidence Pack — EU AI Act</h1>' +
-    '<div class="subtitle">Generated: ' + esc(now) + ' &nbsp;&middot;&nbsp; Tool: BLACKBOX (static demo)</div>' +
+    '<div class="subtitle">Generated: ' + esc(now) + ' &nbsp;&middot;&nbsp; Tool: TELUVANE (static demo)</div>' +
     '<div class="summary">' +
     '<div class="summary-item"><div class="summary-label">Events recorded</div><div class="summary-value">' + EVENTS.length + '</div></div>' +
     '<div class="summary-item"><div class="summary-label">Violations found</div><div class="summary-value' + (violCount > 0 ? ' bad' : '') + '">' + violCount + '</div></div>' +
@@ -509,7 +509,7 @@ function exportEvidence() {
     '<h2>Full Action Log</h2>' +
     '<table><thead><tr><th>Seq</th><th>Kind</th><th>Tool</th><th>Intent / Output</th><th>To</th><th>Approved by</th></tr></thead>' +
     '<tbody>' + evRows + '</tbody></table>' +
-    '<footer>BLACKBOX — MIT licensed — <a href="https://github.com/iWeslax83/blackbox-agent-accountability">github.com/iWeslax83/blackbox-agent-accountability</a></footer>' +
+    '<footer>TELUVANE — MIT licensed — <a href="https://github.com/iWeslax83/teluvane">github.com/iWeslax83/teluvane</a></footer>' +
     '</body></html>';
 
   var blob = new Blob([html], {type: 'text/html'});

@@ -1,4 +1,4 @@
-# blackbox/blackbox/db.py
+# teluvane/teluvane/db.py
 import os
 from psycopg_pool import ConnectionPool
 

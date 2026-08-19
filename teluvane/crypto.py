@@ -1,9 +1,9 @@
-# blackbox/blackbox/crypto.py
+# teluvane/teluvane/crypto.py
 import os
 from cryptography.fernet import Fernet
 
 def _fernet() -> Fernet:
-    key = os.environ["BLACKBOX_SECRET_KEY"]
+    key = os.environ["TELUVANE_SECRET_KEY"]
     return Fernet(key.encode("utf-8") if isinstance(key, str) else key)
 
 def encrypt(plaintext: str) -> str:

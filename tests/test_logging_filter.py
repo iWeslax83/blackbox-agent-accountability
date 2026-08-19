@@ -1,9 +1,9 @@
 import logging, io
-from blackbox.logging_filter import SecretRedactionFilter
+from teluvane.logging_filter import SecretRedactionFilter
 
 def _logger_capturing():
     buf = io.StringIO()
-    logger = logging.getLogger("blackbox.test.redact")
+    logger = logging.getLogger("teluvane.test.redact")
     logger.handlers.clear()
     h = logging.StreamHandler(buf)
     h.setFormatter(logging.Formatter("%(message)s"))
@@ -20,6 +20,6 @@ def test_redacts_anthropic_key_in_message():
 
 def test_redacts_api_key_in_args():
     logger, buf = _logger_capturing()
-    logger.info("key=%s", "bb_live_TOPSECRETzzz")
+    logger.info("key=%s", "tv_live_TOPSECRETzzz")
     out = buf.getvalue()
-    assert "bb_live_TOPSECRETzzz" not in out
+    assert "tv_live_TOPSECRETzzz" not in out

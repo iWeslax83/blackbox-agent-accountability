@@ -1,5 +1,5 @@
-from blackbox.db import get_pool
-from blackbox.migrate import apply_migrations
+from teluvane.db import get_pool
+from teluvane.migrate import apply_migrations
 
 def test_apply_migrations_creates_tables_idempotently():
     apply_migrations()

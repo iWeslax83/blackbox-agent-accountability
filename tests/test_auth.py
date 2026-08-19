@@ -2,9 +2,9 @@ import time
 import jwt as pyjwt
 import pytest
 from fastapi import HTTPException
-import blackbox.auth as auth
-from blackbox.auth import verify_jwt, current_org
-from blackbox.orgs import create_org
+import teluvane.auth as auth
+from teluvane.auth import verify_jwt, current_org
+from teluvane.orgs import create_org
 
 def test_verify_jwt_returns_sub(make_jwt):
     assert verify_jwt(make_jwt("user-1")) == "user-1"

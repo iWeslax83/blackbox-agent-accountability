@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: blackbox-api
+    name: teluvane-api
     runtime: docker
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
@@ -11,7 +11,7 @@ services:
         sync: false
       - key: SUPABASE_JWT_SECRET   # legacy HS256 secret; optional, only used if a project still issues HS256 tokens
         sync: false
-      - key: BLACKBOX_SECRET_KEY   # Fernet key: python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"
+      - key: TELUVANE_SECRET_KEY   # Fernet key: python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"
         sync: false
       - key: FRONTEND_ORIGIN       # https://<your-app>.vercel.app
         sync: false

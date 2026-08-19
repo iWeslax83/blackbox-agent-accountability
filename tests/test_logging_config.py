@@ -1,6 +1,6 @@
 import logging
-from blackbox.logging_config import configure_logging
-from blackbox.logging_filter import SecretRedactionFilter
+from teluvane.logging_config import configure_logging
+from teluvane.logging_filter import SecretRedactionFilter
 
 def test_configure_logging_installs_redaction():
     configure_logging()

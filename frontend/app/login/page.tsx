@@ -40,7 +40,7 @@ export default function LoginPage() {
     return (
       <main className="center-screen">
         <div className="card auth-card">
-          <div className="brand" style={{ marginBottom: 16 }}><span className="mark">B</span> BLACKBOX</div>
+          <div className="brand" style={{ marginBottom: 16 }}><span className="mark">T</span> TELUVANE</div>
           <h1 style={{ marginBottom: 8 }}>Check your inbox</h1>
           <p className="muted small" style={{ marginBottom: 20 }}>
             We sent a confirmation link to <strong>{email}</strong>. Click it to activate your
@@ -58,7 +58,7 @@ export default function LoginPage() {
     <main className="center-screen">
       <div className="card auth-card">
         <div className="brand" style={{ marginBottom: 16 }}>
-          <span className="mark">B</span> BLACKBOX
+          <span className="mark">T</span> TELUVANE
         </div>
         <p className="eyebrow" style={{ marginBottom: 18 }}>AI agent accountability</p>
         <h1 style={{ marginBottom: 4 }}>

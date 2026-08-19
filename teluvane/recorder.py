@@ -1,10 +1,10 @@
-# blackbox/blackbox/recorder.py
+# teluvane/teluvane/recorder.py
 from typing import Any, Optional
 import httpx
 from .schema import Event
 from .store import Store
 
-class BlackBoxRecorder:
+class TeluvaneRecorder:
     """Capture agent steps. Pass a Store for in-process use, or base_url to POST over HTTP."""
     def __init__(self, agent_id: str, session_id: str,
                  store: Optional[Store] = None, base_url: Optional[str] = None,

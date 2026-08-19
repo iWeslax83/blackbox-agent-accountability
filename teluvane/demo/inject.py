@@ -1,8 +1,8 @@
-# blackbox/demo/inject.py
+# teluvane/demo/inject.py
 """Drives two scenarios into one session: a clean action, then a prompt-injected
 exfiltration. Then triggers the tribunal audit. (Requires ANTHROPIC_API_KEY.)"""
 import httpx
-from blackbox.demo.agent import run
+from teluvane.demo.agent import run
 
 BASE = "http://localhost:8900"
 SESSION = "demo-session"

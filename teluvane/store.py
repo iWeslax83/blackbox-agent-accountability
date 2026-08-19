@@ -1,4 +1,4 @@
-# blackbox/blackbox/store.py
+# teluvane/teluvane/store.py
 import hashlib, json
 from typing import Optional
 from psycopg.rows import dict_row

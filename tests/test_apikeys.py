@@ -1,13 +1,13 @@
 import pytest
 from fastapi import HTTPException
-from blackbox.apikeys import create_api_key, resolve_api_key, list_api_keys, revoke_api_key
-from blackbox.orgs import create_org
-from blackbox.db import get_pool
+from teluvane.apikeys import create_api_key, resolve_api_key, list_api_keys, revoke_api_key
+from teluvane.orgs import create_org
+from teluvane.db import get_pool
 
 def test_create_returns_raw_key_and_stores_only_hash(store):
     org = create_org("Acme", "u1")
     raw = create_api_key(org, "ci")
-    assert raw.startswith("bb_live_")
+    assert raw.startswith("tv_live_")
     with get_pool().connection() as conn, conn.cursor() as cur:
         cur.execute("SELECT key_hash FROM api_keys WHERE org_id=%s", (org,))
         stored = cur.fetchone()[0]
@@ -20,7 +20,7 @@ def test_resolve_returns_org(store):
 
 def test_resolve_unknown_key_rejected(store):
     with pytest.raises(HTTPException):
-        resolve_api_key("bb_live_nope")
+        resolve_api_key("tv_live_nope")
 
 def test_revoked_key_rejected(store):
     org = create_org("Acme", "u1")

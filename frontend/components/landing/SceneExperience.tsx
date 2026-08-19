@@ -36,7 +36,7 @@ export default function SceneExperience() {
           camera={{ position: [0, 0, 6], fov: 45 }}
           dpr={[1, 1.5]}
           gl={{ antialias: true, alpha: true }}
-          aria-label="An animated sequence of 3D scenes visualizing BLACKBOX's hash-chain recorder, compliance tribunal, and evidence pack, synchronized to page scroll"
+          aria-label="An animated sequence of 3D scenes visualizing TELUVANE's hash-chain recorder, compliance tribunal, and evidence pack, synchronized to page scroll"
         >
           <ambientLight intensity={0.5} />
           <directionalLight position={[3, 4, 5]} intensity={0.8} />
@@ -73,7 +73,7 @@ export default function SceneExperience() {
                   }}>
                     Get started free
                   </a>
-                  <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
+                  <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
                     display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
                     borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
                     background: "transparent", color: TEXT_ON_DARK, border: `1.5px solid ${BORDER_ON_DARK}`, textDecoration: "none",

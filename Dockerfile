@@ -1,10 +1,10 @@
-# BLACKBOX — AI Agent Flight Recorder & Compliance Tribunal
-# Build: docker build -t blackbox .
-# Run:   docker run -p 8900:8900 blackbox
+# TELUVANE — AI Agent Flight Recorder & Compliance Tribunal
+# Build: docker build -t teluvane .
+# Run:   docker run -p 8900:8900 teluvane
 #
 # ANTHROPIC_API_KEY is optional — only the live Claude tribunal needs it.
 # The ingest service, dashboard, chain verifier, and offline replay all work without it.
-# Pass it at runtime: docker run -e ANTHROPIC_API_KEY=sk-ant-... -p 8900:8900 blackbox
+# Pass it at runtime: docker run -e ANTHROPIC_API_KEY=sk-ant-... -p 8900:8900 teluvane
 
 FROM python:3.11-slim
 
@@ -29,4 +29,4 @@ RUN pip install --no-cache-dir -e .
 EXPOSE 8900
 
 # Shell-form so ${PORT:-8900} is expanded at container start time
-CMD uvicorn blackbox.ingest:app --host 0.0.0.0 --port ${PORT:-8900}
+CMD uvicorn teluvane.ingest:app --host 0.0.0.0 --port ${PORT:-8900}

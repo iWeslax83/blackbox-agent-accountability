@@ -49,7 +49,7 @@ export default function KeysPage() {
       <main className="page">
         <p className="eyebrow">Workspace</p>
         <h1 style={{ marginBottom: 6 }}>API keys</h1>
-        <p className="muted small">Use a key as a bearer token so your agents can record events to BLACKBOX.</p>
+        <p className="muted small">Use a key as a bearer token so your agents can record events to TELUVANE.</p>
 
         <div className="toolbar">
           <input className="input" placeholder="key name (e.g. production)"
@@ -80,7 +80,7 @@ export default function KeysPage() {
         )}
 
         <div className="section-title"><h2>Record an event</h2></div>
-        <p className="muted small">Send agent actions to BLACKBOX with your key as a bearer token:</p>
+        <p className="muted small">Send agent actions to TELUVANE with your key as a bearer token:</p>
         <pre className="notice" style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
 {`curl -X POST ${apiBase}/events \\
   -H "Authorization: Bearer bb_live_…" \\

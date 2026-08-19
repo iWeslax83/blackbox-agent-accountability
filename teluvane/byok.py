@@ -1,4 +1,4 @@
-# blackbox/blackbox/byok.py
+# teluvane/teluvane/byok.py
 from typing import Optional
 from .db import get_pool
 from .crypto import encrypt, decrypt

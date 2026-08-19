@@ -1,4 +1,4 @@
-from blackbox.db import get_pool, POOL_MAX_SIZE
+from teluvane.db import get_pool, POOL_MAX_SIZE
 
 def test_pool_is_singleton_and_bounded():
     p1 = get_pool()

@@ -1,6 +1,6 @@
-# blackbox/tests/test_tribunal.py
-from blackbox.tribunal import consolidate
-from blackbox.schema import Verdict
+# teluvane/tests/test_tribunal.py
+from teluvane.tribunal import consolidate
+from teluvane.schema import Verdict
 
 def v(rule, viol, conf, sev="high"):
     return Verdict(session_id="s1", rule_id=rule, severity=sev, violation=viol,

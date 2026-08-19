@@ -1,4 +1,4 @@
-from blackbox.orgs import create_org, org_for_user
+from teluvane.orgs import create_org, org_for_user
 
 def test_create_org_makes_owner_member(store):   # `store` fixture truncates events/verdicts
     org_id = create_org("Acme", "user-123")

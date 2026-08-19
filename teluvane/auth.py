@@ -1,4 +1,4 @@
-# blackbox/blackbox/auth.py
+# teluvane/teluvane/auth.py
 import os
 import jwt
 from jwt import PyJWKClient

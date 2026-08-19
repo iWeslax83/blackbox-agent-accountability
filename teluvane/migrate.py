@@ -1,4 +1,4 @@
-# blackbox/blackbox/migrate.py
+# teluvane/teluvane/migrate.py
 import pathlib
 from .db import get_pool
 

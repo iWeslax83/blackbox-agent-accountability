@@ -10,7 +10,7 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "BLACKBOX: AI Agent Accountability",
+  title: "TELUVANE: AI Agent Accountability",
   description: "Tamper-evident flight recorder + autonomous compliance tribunal for AI agents.",
 };
 

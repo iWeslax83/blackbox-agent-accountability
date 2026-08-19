@@ -1,4 +1,4 @@
-# blackbox/blackbox/auditlock.py
+# teluvane/teluvane/auditlock.py
 from .tribunal import audit   # imported at module scope so tests can monkeypatch it here
 
 def audited_run(store, org_id: str, session_id: str, pack, api_key: str | None):

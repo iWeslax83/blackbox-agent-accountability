@@ -1,5 +1,5 @@
 import pytest
-from blackbox.schema import Event, Verdict
+from teluvane.schema import Event, Verdict
 
 def _ev(session_id="s1", **kw):
     return Event(agent_id="a", session_id=session_id, kind="tool_call", **kw)

@@ -1,4 +1,4 @@
-# blackbox/blackbox/evidence.py
+# teluvane/teluvane/evidence.py
 import html as _html
 from .schema import Event, Verdict
 

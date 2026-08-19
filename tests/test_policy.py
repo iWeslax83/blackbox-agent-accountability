@@ -1,5 +1,5 @@
-# blackbox/tests/test_policy.py
-from blackbox.policy import load_policy_pack
+# teluvane/tests/test_policy.py
+from teluvane.policy import load_policy_pack
 
 def test_load_policy_pack():
     pack = load_policy_pack("policies/eu_ai_act.yaml")

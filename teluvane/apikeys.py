@@ -1,9 +1,9 @@
-# blackbox/blackbox/apikeys.py
+# teluvane/teluvane/apikeys.py
 import hashlib, secrets
 from fastapi import Header, HTTPException
 from .db import get_pool
 
-KEY_PREFIX = "bb_live_"
+KEY_PREFIX = "tv_live_"
 
 def _hash(raw: str) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()

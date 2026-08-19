@@ -1,4 +1,4 @@
-# blackbox/blackbox/orgs.py
+# teluvane/teluvane/orgs.py
 import uuid
 from typing import Optional
 from .db import get_pool

@@ -1,4 +1,4 @@
-# blackbox/blackbox/policy.py
+# teluvane/teluvane/policy.py
 import yaml
 from pydantic import BaseModel
 

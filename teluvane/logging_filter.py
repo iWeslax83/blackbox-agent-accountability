@@ -1,9 +1,9 @@
-# blackbox/blackbox/logging_filter.py
+# teluvane/teluvane/logging_filter.py
 import logging, re
 
 _PATTERNS = [
     re.compile(r"sk-ant-[A-Za-z0-9_\-]+"),
-    re.compile(r"bb_live_[A-Za-z0-9_\-]+"),
+    re.compile(r"tv_live_[A-Za-z0-9_\-]+"),
 ]
 
 def _redact(value):

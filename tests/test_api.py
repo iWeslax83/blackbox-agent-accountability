@@ -1,13 +1,13 @@
 import os, time
 os.environ.setdefault("DATABASE_URL",
-    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/blackbox_test"))
+    os.environ.get("TEST_DATABASE_URL", "postgresql://localhost:5432/teluvane_test"))
 os.environ.setdefault("SUPABASE_JWT_SECRET", "test-secret")
 import jwt, pytest
 from fastapi.testclient import TestClient
-from blackbox.migrate import apply_migrations
-from blackbox.db import get_pool
-from blackbox.orgs import create_org
-from blackbox.apikeys import create_api_key
+from teluvane.migrate import apply_migrations
+from teluvane.db import get_pool
+from teluvane.orgs import create_org
+from teluvane.apikeys import create_api_key
 
 @pytest.fixture(autouse=True)
 def _clean_db():
@@ -18,7 +18,7 @@ def _clean_db():
 
 @pytest.fixture
 def client():
-    from blackbox.ingest import app
+    from teluvane.ingest import app
     return TestClient(app)
 
 def _jwt(user_id):
@@ -59,7 +59,7 @@ def test_create_and_list_keys(client):
     create_org("Acme", "u1")
     h = {"Authorization": f"Bearer {_jwt('u1')}"}
     r = client.post("/keys", json={"name": "prod"}, headers=h)
-    assert r.status_code == 200 and r.json()["key"].startswith("bb_live_")
+    assert r.status_code == 200 and r.json()["key"].startswith("tv_live_")
     r2 = client.get("/keys", headers=h)
     assert r2.status_code == 200 and len(r2.json()) == 1 and "key_hash" not in r2.json()[0]
 

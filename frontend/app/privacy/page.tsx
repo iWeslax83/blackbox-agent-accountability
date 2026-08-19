@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy: BLACKBOX",
-  description: "How BLACKBOX collects, uses, and protects your data.",
+  title: "Privacy Policy: TELUVANE",
+  description: "How TELUVANE collects, uses, and protects your data.",
 };
 
 const sectionStyle: React.CSSProperties = { marginBottom: "2rem" };
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>What we collect</h2>
           <p style={bodyStyle}>
-            When you create an account, we collect the email address and password you provide (handled by our authentication provider, Supabase). If you enable BYOK (bring your own key) mode, we store the Anthropic API key you supply so BLACKBOX can run live tribunal audits on your behalf. We also store the AI agent action logs you send us for auditing, the API keys BLACKBOX issues you for programmatic access, and basic usage counters (how many hosted audits your workspace has run).
+            When you create an account, we collect the email address and password you provide (handled by our authentication provider, Supabase). If you enable BYOK (bring your own key) mode, we store the Anthropic API key you supply so TELUVANE can run live tribunal audits on your behalf. We also store the AI agent action logs you send us for auditing, the API keys TELUVANE issues you for programmatic access, and basic usage counters (how many hosted audits your workspace has run).
           </p>
         </section>
 
@@ -66,9 +66,9 @@ export default function PrivacyPage() {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>Contact</h2>
           <p style={bodyStyle}>
-            BLACKBOX is an open-source project (MIT licensed) based in Bursa, Türkiye. For privacy questions or data requests, open an issue at{" "}
-            <a href="https://github.com/iWeslax83/blackbox-agent-accountability" target="_blank" rel="noopener" style={{ color: "#b4451f" }}>
-              github.com/iWeslax83/blackbox-agent-accountability
+            TELUVANE is an open-source project (MIT licensed) based in Bursa, Türkiye. For privacy questions or data requests, open an issue at{" "}
+            <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" style={{ color: "#b4451f" }}>
+              github.com/iWeslax83/teluvane
             </a>.
           </p>
         </section>

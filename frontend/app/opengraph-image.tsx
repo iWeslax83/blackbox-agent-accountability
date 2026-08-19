@@ -41,10 +41,10 @@ export default function OpengraphImage() {
               fontWeight: 800,
             }}
           >
-            B
+            T
           </div>
           <div style={{ fontSize: 40, fontWeight: 800, color: "#1a1714", letterSpacing: "-0.02em" }}>
-            BLACKBOX
+            TELUVANE
           </div>
         </div>
         <div

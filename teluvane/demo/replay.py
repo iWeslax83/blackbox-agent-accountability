@@ -1,11 +1,11 @@
-# blackbox/demo/replay.py
+# teluvane/demo/replay.py
 """Offline demo path: replays demo/fallback_log.jsonl into the running ingest service
 so the dashboard/feed/evidence/tamper showcase work WITHOUT an API key.
-Usage: python -m blackbox.demo.replay   (ingest must be running on :8900)"""
+Usage: python -m teluvane.demo.replay   (ingest must be running on :8900)"""
 import json, os, sys
 import httpx
 
-BASE = os.environ.get("BLACKBOX_URL", "http://localhost:8900")
+BASE = os.environ.get("TELUVANE_URL", "http://localhost:8900")
 HERE = os.path.dirname(__file__)
 
 def main():

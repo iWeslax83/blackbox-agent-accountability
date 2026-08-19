@@ -19,7 +19,7 @@ export default function HashChainStatic() {
       viewBox={`0 0 ${width} ${height}`}
       width="100%"
       role="img"
-      aria-label="Six linked hash-chain blocks, the last one highlighted, representing BLACKBOX's tamper-evident log chain"
+      aria-label="Six linked hash-chain blocks, the last one highlighted, representing TELUVANE's tamper-evident log chain"
     >
       {blocks.slice(0, -1).map((block, i) => (
         <line

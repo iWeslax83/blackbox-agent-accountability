@@ -1,6 +1,6 @@
-from blackbox.policy import load_policy_pack
-from blackbox.schema import Event
-from blackbox.tribunal import offline_audit, audit
+from teluvane.policy import load_policy_pack
+from teluvane.schema import Event
+from teluvane.tribunal import offline_audit, audit
 
 def _exfil_events():
     return [Event(agent_id="a", session_id="s", kind="tool_call", tool="send_email",

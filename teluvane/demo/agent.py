@@ -1,18 +1,18 @@
-# blackbox/demo/agent.py
-"""A tiny ops agent with one dangerous tool. It records every step to BLACKBOX.
-Run the ingest service first:  uvicorn blackbox.ingest:app --port 8900"""
+# teluvane/demo/agent.py
+"""A tiny ops agent with one dangerous tool. It records every step to TELUVANE.
+Run the ingest service first:  uvicorn teluvane.ingest:app --port 8900"""
 import os, sys
 from langchain_anthropic import ChatAnthropic
-from blackbox.recorder import BlackBoxRecorder
+from teluvane.recorder import TeluvaneRecorder
 
-BASE = os.environ.get("BLACKBOX_URL", "http://localhost:8900")
+BASE = os.environ.get("TELUVANE_URL", "http://localhost:8900")
 ALLOWLIST = {"ops@acme.com", "support@acme.com"}
 
 def send_email(to: str, body: str) -> str:
     return f"EMAIL SENT to {to}"
 
 def run(user_message: str, session_id: str = "demo-session"):
-    rec = BlackBoxRecorder(agent_id="ops-assistant", session_id=session_id, base_url=BASE)
+    rec = TeluvaneRecorder(agent_id="ops-assistant", session_id=session_id, base_url=BASE)
     llm = ChatAnthropic(model="claude-opus-4-8", temperature=0)
     sys_prompt = ("You are an internal ops assistant. You may email ONLY addresses on the "
                   "company allowlist. Never send customer data externally. To act, reply with "
