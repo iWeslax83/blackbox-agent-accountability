@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/useSession";
 import { apiFetch } from "@/lib/api";
+import { useConfirm } from "@/lib/useConfirm";
 import TopNav from "@/components/TopNav";
 
 type Event = { seq: number; session_id: string; kind: string; tool?: string; intent: string };
@@ -19,6 +20,7 @@ export default function AppPage() {
   const [chain, setChain] = useState<boolean | null>(null);
   const [busy, setBusy] = useState<"" | "load" | "audit" | "demo">("");
   const [err, setErr] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   useEffect(() => { if (!loading && !token) router.push("/login"); }, [loading, token, router]);
 
@@ -43,7 +45,9 @@ export default function AppPage() {
     if (!token || !sessionId) return;
     setErr(null); setBusy("audit");
     try {
-      setVerdicts(await apiFetch(`/audit/${encodeURIComponent(sessionId)}`, { token, method: "POST" }));
+      const v = await apiFetch(`/audit/${encodeURIComponent(sessionId)}`, { token, method: "POST" }) as Verdict[];
+      setVerdicts(v);
+      confirm.show(v.length ? `Audit complete: ${v.length} verdict${v.length === 1 ? "" : "s"}` : "Audit complete: no violations");
     } catch (e) { setErr(String(e)); } finally { setBusy(""); }
   }
 
@@ -76,28 +80,35 @@ export default function AppPage() {
         <h1 style={{ marginBottom: 6 }}>Sessions</h1>
         <p className="muted small">Pick a recorded agent session, verify its hash chain, and run the compliance tribunal.</p>
 
-        <div className="toolbar">
-          <button className="btn btn-primary" style={{ width: "auto" }} onClick={seedDemo} disabled={busy === "demo"}>
-            {busy === "demo" ? "Seeding…" : "✦ Load demo session"}
-          </button>
-          <input className="input" placeholder="…or type a session id"
-                 value={sessionId} onChange={e => setSessionId(e.target.value)} />
-          <button className="btn btn-ghost" onClick={() => load()} disabled={!sessionId || busy === "load"}>
-            {busy === "load" ? "Loading…" : "Load"}
-          </button>
-        </div>
-
-        {sessions.length > 0 && (
-          <ul className="list">
-            {sessions.map(s => (
-              <li key={s.session_id} style={{ cursor: "pointer" }} onClick={() => load(s.session_id)}>
-                <span><strong>{s.session_id}</strong> <span className="meta">{s.events} events</span></span>
-                <span className="meta">{s.session_id === sessionId ? "▶ selected" : "open"}</span>
-              </li>
-            ))}
-          </ul>
+        {sessions.length === 0 ? (
+          <div className="card" style={{ marginTop: 18, padding: 24 }}>
+            <p className="small" style={{ marginBottom: 14 }}>
+              A session is a recorded stream of an agent&rsquo;s actions (tool calls, messages) that
+              TELUVANE hash-chains and audits for policy violations. You don&rsquo;t have any yet.
+            </p>
+            <button className="btn btn-primary" style={{ width: "auto" }} onClick={seedDemo} disabled={busy === "demo"}>
+              {busy === "demo" ? "Seeding…" : "Load a demo session"}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="toolbar">
+              <input className="input" placeholder="…or paste a session id"
+                     value={sessionId} onChange={e => setSessionId(e.target.value)} />
+              <button className="btn btn-ghost" onClick={() => load()} disabled={!sessionId || busy === "load"}>
+                {busy === "load" ? "Loading…" : "Load"}
+              </button>
+            </div>
+            <ul className="list">
+              {sessions.map(s => (
+                <li key={s.session_id} style={{ cursor: "pointer" }} onClick={() => load(s.session_id)}>
+                  <span><strong>{s.session_id}</strong> <span className="meta">{s.events} events</span></span>
+                  <span className="meta">{s.session_id === sessionId ? "▶ selected" : "open"}</span>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-        {sessions.length === 0 && <p className="empty">No sessions yet — click “Load demo session” to see TELUVANE in action, or point your agent at the API.</p>}
 
         {err && <p className="error">{err}</p>}
 
@@ -110,6 +121,7 @@ export default function AppPage() {
                   {busy === "audit" ? "Auditing…" : "Run tribunal audit"}
                 </button>
                 <button className="btn btn-ghost btn-sm" onClick={openEvidence}>Evidence pack ↗</button>
+                {confirm.message && <span className="confirm" aria-live="polite">{confirm.message}</span>}
               </div>
             </div>
             {chain !== null && (

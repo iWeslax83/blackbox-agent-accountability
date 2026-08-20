@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSession } from "@/lib/useSession";
 import { apiFetch } from "@/lib/api";
+import { useConfirm } from "@/lib/useConfirm";
 import TopNav from "@/components/TopNav";
 
 export default function SettingsPage() {
@@ -9,6 +10,7 @@ export default function SettingsPage() {
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [key, setKey] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -20,12 +22,12 @@ export default function SettingsPage() {
   async function save() {
     if (!token || !key) return;
     setErr(null);
-    try { await apiFetch("/byok", { token, method: "PUT", body: { key } }); setKey(""); refresh(); }
+    try { await apiFetch("/byok", { token, method: "PUT", body: { key } }); setKey(""); refresh(); confirm.show("Key saved"); }
     catch (e) { setErr(String(e)); }
   }
   async function clear() {
     if (!token) return;
-    try { await apiFetch("/byok", { token, method: "DELETE" }); refresh(); }
+    try { await apiFetch("/byok", { token, method: "DELETE" }); refresh(); confirm.show("Key cleared"); }
     catch (e) { setErr(String(e)); }
   }
 
@@ -55,6 +57,7 @@ export default function SettingsPage() {
           <div className="btn-row">
             <button className="btn btn-primary" style={{ width: "auto" }} onClick={save} disabled={!key}>Save</button>
             <button className="btn btn-ghost" onClick={clear} disabled={!configured}>Clear</button>
+            {confirm.message && <span className="confirm" aria-live="polite">{confirm.message}</span>}
           </div>
           {err && <p className="error">{err}</p>}
         </div>

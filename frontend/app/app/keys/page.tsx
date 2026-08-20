@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/useSession";
 import { apiFetch } from "@/lib/api";
+import { useConfirm } from "@/lib/useConfirm";
 import TopNav from "@/components/TopNav";
 
 type ApiKey = { id: number; name: string; prefix: string; revoked_at: string | null };
@@ -16,6 +17,7 @@ export default function KeysPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
+  const confirm = useConfirm();
 
   useEffect(() => { if (!sessionLoading && !token) router.push("/login"); }, [sessionLoading, token, router]);
 
@@ -39,7 +41,7 @@ export default function KeysPage() {
   }
   async function revoke(id: number) {
     if (!token) return;
-    try { await apiFetch(`/keys/${id}`, { token, method: "DELETE" }); refresh(); }
+    try { await apiFetch(`/keys/${id}`, { token, method: "DELETE" }); refresh(); confirm.show("Key revoked"); }
     catch (e) { setErr(String(e)); }
   }
 
@@ -57,6 +59,7 @@ export default function KeysPage() {
           <button className="btn btn-primary" style={{ width: "auto" }} onClick={create} disabled={!name}>
             Create key
           </button>
+          {confirm.message && <span className="confirm" aria-live="polite">{confirm.message}</span>}
         </div>
 
         {created && (

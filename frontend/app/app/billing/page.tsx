@@ -92,7 +92,7 @@ function BillingPageInner() {
             <>
               <div className="row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
                 <span className="label" style={{ margin: 0 }}>Plan</span>
-                <span className="plan-tag">{plan === null ? (err ? "unknown" : "checking…") : plan.plan}</span>
+                <span className="plan-tag">{plan === null ? (err ? "unreachable" : "checking…") : plan.plan}</span>
               </div>
 
               {usage && (

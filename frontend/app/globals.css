@@ -104,12 +104,19 @@ h2 { font-size: 1.05rem; letter-spacing: 0.01em; }
 .code { font-family: ui-monospace, Menlo, monospace; background: #efe9dd; padding: 3px 7px; border-radius: 6px; font-size: 0.84rem; word-break: break-all; }
 .section-title { display: flex; align-items: center; justify-content: space-between; margin: 30px 0 6px; }
 
-/* badges */
-.badge { font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+/* status: bordered rect + dot, not a pill */
+.badge { display: inline-flex; align-items: center; gap: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; padding: 3px 9px 3px 7px; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); }
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex: none; }
 .badge.ok { color: #14532d; border-color: #bfe3c8; background: #eef7f0; }
+.badge.ok::before { background: #2f7d4f; }
 .badge.bad { color: #7a1f12; border-color: #e7c3bb; background: #fbeee9; }
+.badge.bad::before { background: var(--rust); }
 .sev { text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em; }
 .sev.critical, .sev.high { color: var(--rust); }
+
+/* inline action confirmation */
+.confirm { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #14532d; margin-left: 10px; }
+.confirm::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #2f7d4f; flex: none; }
 
 /* plan tag: bordered rectangle, not a pill */
 .plan-tag {
