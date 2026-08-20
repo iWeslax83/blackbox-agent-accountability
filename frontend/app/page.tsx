@@ -1,7 +1,7 @@
 // frontend/app/page.tsx
 import type { Metadata } from "next";
 import LandingBody from "@/components/landing/LandingBody";
-import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, BORDER_ON_DARK } from "@/lib/landingTheme";
+import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, ACCENT_ON_FILL, BORDER_ON_DARK } from "@/lib/landingTheme";
 import { landingFont } from "@/lib/landingFont";
 
 export const metadata: Metadata = {
@@ -28,8 +28,8 @@ export default function Landing() {
           <li><a href="#pricing" className="landing-link" style={{ color: TEXT_ON_DARK, fontSize: ".9rem", fontWeight: 500, textDecoration: "none" }}>Pricing</a></li>
           <li>
             <a href="/login" className="landing-btn" style={{
-              background: ACCENT_FILL, color: "#fff",
-              padding: ".38rem .9rem", borderRadius: 6, fontSize: ".9rem", fontWeight: 600,
+              background: ACCENT_FILL, color: ACCENT_ON_FILL,
+              padding: ".38rem .9rem", borderRadius: 6, fontSize: ".9rem", fontWeight: 700,
               textDecoration: "none",
             }}>Get started free</a>
           </li>

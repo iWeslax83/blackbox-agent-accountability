@@ -1,24 +1,33 @@
-import { DARK_SURFACE, BORDER_ON_DARK, ACCENT_FILL, ACCENT_TEXT, TEXT_ON_DARK, MUTED_ON_DARK } from "@/lib/landingTheme";
+import { DARK_BG, DARK_SURFACE, BORDER_ON_DARK, ACCENT_FILL, ACCENT_ON_FILL, ACCENT_TEXT, TEXT_ON_DARK, MUTED_ON_DARK } from "@/lib/landingTheme";
 
 function Tier({
-  eyebrow, price, priceSuffix, description, features, ctaLabel, ctaHref, emphasized, align,
+  eyebrow, price, priceSuffix, description, features, ctaLabel, ctaHref, emphasized,
 }: {
   eyebrow: string; price: string; priceSuffix?: string; description: string;
   features: string[]; ctaLabel: string; ctaHref: string; emphasized?: boolean;
-  align: "left" | "right";
 }) {
   return (
     <div style={{
-      maxWidth: 460,
-      marginLeft: align === "right" ? "auto" : 0,
-      marginRight: align === "left" ? "auto" : 0,
-      background: DARK_SURFACE,
-      border: `1px solid ${emphasized ? ACCENT_FILL : BORDER_ON_DARK}`,
+      flex: "1 1 280px",
+      minWidth: 0,
+      background: emphasized ? DARK_BG : DARK_SURFACE,
+      border: `1.5px solid ${emphasized ? ACCENT_FILL : BORDER_ON_DARK}`,
       borderRadius: 12,
-      padding: "2rem",
-      marginBottom: "3rem",
+      padding: "2rem 1.7rem",
+      position: "relative",
+      transform: emphasized ? "translateY(-.6rem)" : undefined,
     }}>
-      <div style={{ fontSize: ".78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".07em", color: MUTED_ON_DARK, marginBottom: ".5rem" }}>
+      {emphasized && (
+        <div style={{
+          position: "absolute", top: 0, left: "1.7rem", transform: "translateY(-50%)",
+          background: ACCENT_FILL, color: ACCENT_ON_FILL,
+          fontSize: ".7rem", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase",
+          padding: ".2rem .6rem", borderRadius: 3,
+        }}>
+          Most teams pick this
+        </div>
+      )}
+      <div style={{ fontSize: ".78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".07em", color: emphasized ? ACCENT_TEXT : MUTED_ON_DARK, marginBottom: ".5rem", marginTop: emphasized ? ".3rem" : 0 }}>
         {eyebrow}
       </div>
       <div style={{ fontSize: "2.4rem", fontWeight: 900, letterSpacing: "-.03em", color: TEXT_ON_DARK }}>
@@ -34,10 +43,10 @@ function Tier({
         ))}
       </ul>
       <a href={ctaHref} target={ctaHref.startsWith("http") ? "_blank" : undefined} rel={ctaHref.startsWith("http") ? "noopener" : undefined} className="landing-btn" style={{
-        display: "block", textAlign: "center", padding: ".7rem 1rem", borderRadius: 7,
-        fontSize: ".9rem", fontWeight: 600, textDecoration: "none",
+        display: "block", textAlign: "center", padding: ".75rem 1rem", borderRadius: 7,
+        fontSize: ".9rem", fontWeight: 700, textDecoration: "none",
         background: emphasized ? ACCENT_FILL : "transparent",
-        color: emphasized ? "#fff" : TEXT_ON_DARK,
+        color: emphasized ? ACCENT_ON_FILL : TEXT_ON_DARK,
         border: emphasized ? "none" : `1.5px solid ${BORDER_ON_DARK}`,
       }}>
         {ctaLabel}
@@ -56,35 +65,34 @@ export default function PricingZigzag({ headingColor = TEXT_ON_DARK }: { heading
         Start free. Scale with confidence.
       </h2>
 
-      <Tier
-        align="left"
-        eyebrow="Free / Open Source"
-        price="$0"
-        description="Self-host on your own infrastructure. AGPL-3.0 licensed."
-        features={["Unlimited agents (self-hosted)", "SHA-256 hash-chained recorder", "EU AI Act policy pack (YAML)", "Tribunal audit CLI", "Evidence pack export (HTML)", "Community support (GitHub)"]}
-        ctaLabel="View on GitHub"
-        ctaHref="https://github.com/iWeslax83/teluvane"
-      />
-      <Tier
-        align="right"
-        emphasized
-        eyebrow="Pro"
-        price="$19.99"
-        priceSuffix="/mo"
-        description="Managed cloud. Everything you need for a production AI team."
-        features={["Up to 10 agents managed", "Hosted dashboard and real-time log", "Automated tribunal runs on schedule", "PDF + HTML evidence pack exports", "Custom policy rules", "Priority email support"]}
-        ctaLabel="Get started free"
-        ctaHref="/login"
-      />
-      <Tier
-        align="left"
-        eyebrow="Enterprise"
-        price="Custom"
-        description="For regulated industries, large deployments, on-prem needs."
-        features={["Unlimited agents", "SSO / SAML integration", "On-premises deployment", "Custom policy packs and mapping", "Dedicated SLA and support", "Regulator liaison assistance"]}
-        ctaLabel="Contact us"
-        ctaHref="/login"
-      />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "1.6rem", alignItems: "stretch" }}>
+        <Tier
+          eyebrow="Free / Open Source"
+          price="$0"
+          description="Self-host on your own infrastructure. AGPL-3.0 licensed."
+          features={["Unlimited agents (self-hosted)", "SHA-256 hash-chained recorder", "EU AI Act policy pack (YAML)", "Tribunal audit CLI", "Evidence pack export (HTML)", "Community support (GitHub)"]}
+          ctaLabel="View on GitHub"
+          ctaHref="https://github.com/iWeslax83/teluvane"
+        />
+        <Tier
+          emphasized
+          eyebrow="Pro"
+          price="$19.99"
+          priceSuffix="/mo"
+          description="Managed cloud. Everything you need for a production AI team, without running your own infrastructure."
+          features={["Up to 10 agents managed", "Hosted dashboard and real-time log", "Automated tribunal runs on schedule", "PDF + HTML evidence pack exports", "Custom policy rules", "Priority email support"]}
+          ctaLabel="Get started free"
+          ctaHref="/login"
+        />
+        <Tier
+          eyebrow="Enterprise"
+          price="Custom"
+          description="For regulated industries, large deployments, on-prem needs."
+          features={["Unlimited agents", "SSO / SAML integration", "On-premises deployment", "Custom policy packs and mapping", "Dedicated SLA and support", "Regulator liaison assistance"]}
+          ctaLabel="Contact us"
+          ctaHref="/login"
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { DARK_BG, DARK_SURFACE, TEXT_ON_DARK, ACCENT_TEXT, ACCENT_FILL, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
+import { DARK_BG, DARK_SURFACE, TEXT_ON_DARK, ACCENT_TEXT, ACCENT_FILL, ACCENT_ON_FILL, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
 
 export default function Cta() {
   return (
@@ -16,9 +16,9 @@ export default function Cta() {
           </p>
           <a href="/login" className="landing-btn" style={{
             display: "inline-block",
-            background: ACCENT_FILL, color: "#fff",
+            background: ACCENT_FILL, color: ACCENT_ON_FILL,
             padding: ".75rem 2rem", borderRadius: 8,
-            fontSize: "1rem", fontWeight: 600, textDecoration: "none",
+            fontSize: "1rem", fontWeight: 700, textDecoration: "none",
           }}>
             Get started free →
           </a>
