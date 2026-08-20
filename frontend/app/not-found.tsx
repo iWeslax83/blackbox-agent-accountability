@@ -35,7 +35,7 @@ export default function NotFound() {
           fontWeight: 800,
         }}
       >
-        B
+        T
       </div>
       <h1 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-0.02em", margin: 0 }}>
         Page not found

@@ -34,7 +34,7 @@ export default function AuthCallback() {
     <main className="center-screen">
       <div className="card auth-card" style={{ textAlign: "center" }}>
         <div className="brand" style={{ justifyContent: "center", marginBottom: 14 }}>
-          <span className="mark">B</span> TELUVANE
+          <span className="mark">T</span> TELUVANE
         </div>
         <p className="muted">{msg}</p>
         <p className="muted small" style={{ marginTop: 14 }}><a href="/login">Go to log in</a></p>
