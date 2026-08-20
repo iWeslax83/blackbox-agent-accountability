@@ -1,12 +1,12 @@
-import { DARK_SURFACE, TEXT_ON_DARK, ACCENT_TEXT, ACCENT_FILL, MUTED_ON_DARK, BORDER_ON_DARK, BG_LIGHT, TEXT_ON_LIGHT, MUTED_ON_LIGHT } from "@/lib/landingTheme";
+import { DARK_BG, DARK_SURFACE, TEXT_ON_DARK, ACCENT_TEXT, ACCENT_FILL, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
 
 export default function Cta() {
   return (
-    <section id="cta" style={{ padding: "5rem 2rem", background: BG_LIGHT }}>
+    <section id="cta" style={{ padding: "5rem 2rem", background: DARK_BG }}>
       <div style={{ maxWidth: 960, margin: "0 auto" }}>
-        <div style={{ fontSize: ".75rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_FILL, marginBottom: ".6rem", textAlign: "center" }}>Early access</div>
-        <h2 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem", color: TEXT_ON_LIGHT, textAlign: "center" }}>Get started today</h2>
-        <p style={{ fontSize: "1.05rem", color: MUTED_ON_LIGHT, textAlign: "center", maxWidth: 520, margin: "0 auto" }}>
+        <div style={{ fontSize: ".75rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: ".6rem", textAlign: "center" }}>Early access</div>
+        <h2 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1rem", color: TEXT_ON_DARK, textAlign: "center" }}>Get started today</h2>
+        <p style={{ fontSize: "1.05rem", color: MUTED_ON_DARK, textAlign: "center", maxWidth: 520, margin: "0 auto" }}>
           We&apos;re onboarding early teams. Create your account and start monitoring your agents in minutes.
         </p>
         <div style={{ background: DARK_SURFACE, border: `1px solid ${BORDER_ON_DARK}`, borderRadius: 14, padding: "2.8rem", maxWidth: 520, margin: "2.5rem auto 0", boxShadow: "0 2px 12px rgba(0,0,0,.15)", textAlign: "center" }}>

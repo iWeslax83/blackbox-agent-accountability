@@ -1,7 +1,7 @@
 // frontend/app/page.tsx
 import type { Metadata } from "next";
-import SceneGate from "@/components/landing/SceneGate";
-import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
+import LandingBody from "@/components/landing/LandingBody";
+import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, BORDER_ON_DARK } from "@/lib/landingTheme";
 import { landingFont } from "@/lib/landingFont";
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default function Landing() {
           TELUVANE
         </a>
         <ul style={{ display: "flex", alignItems: "center", gap: "1.6rem", listStyle: "none", margin: 0, padding: 0 }}>
-          <li><a href="#recorder" className="landing-link" style={{ color: TEXT_ON_DARK, fontSize: ".9rem", fontWeight: 500, textDecoration: "none" }}>How it works</a></li>
+          <li><a href="#how" className="landing-link" style={{ color: TEXT_ON_DARK, fontSize: ".9rem", fontWeight: 500, textDecoration: "none" }}>How it works</a></li>
           <li><a href="#pricing" className="landing-link" style={{ color: TEXT_ON_DARK, fontSize: ".9rem", fontWeight: 500, textDecoration: "none" }}>Pricing</a></li>
           <li>
             <a href="/login" className="landing-btn" style={{
@@ -36,7 +36,7 @@ export default function Landing() {
         </ul>
       </nav>
 
-      <SceneGate />
+      <LandingBody />
     </div>
   );
 }
