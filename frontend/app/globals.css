@@ -130,7 +130,11 @@ h2 { font-size: 1.05rem; letter-spacing: 0.01em; }
 .meter-fill { height: 100%; background: var(--rust); }
 
 /* misc */
-.error { color: var(--rust); font-size: 0.86rem; margin-top: 12px; }
+.error {
+  color: var(--ink); font-size: 0.86rem; margin-top: 12px;
+  padding: 9px 12px; background: #fbf8f1; border: 1px solid var(--border);
+  border-left: 3px solid var(--rust); border-radius: 2px;
+}
 .notice { background: #fff; border: 1px dashed var(--border); border-radius: 9px; padding: 12px 14px; font-size: 0.85rem; color: var(--muted); margin-top: 14px; }
 .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 14px 0 6px; }
 .toolbar .input { max-width: 280px; }
