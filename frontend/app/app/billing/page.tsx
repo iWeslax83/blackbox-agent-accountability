@@ -21,7 +21,7 @@ function BillingPageInner() {
   const { token, loading: sessionLoading } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const justUpgraded = searchParams.get("upgraded") === "true";
+  const [justUpgraded] = useState(() => searchParams.get("upgraded") === "true");
   const [plan, setPlan] = useState<Plan | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -30,7 +30,7 @@ function BillingPageInner() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (!sessionLoading && !token) router.push("/login"); }, [sessionLoading, token, router]);
-  useEffect(() => { if (justUpgraded) router.replace("/app/billing"); }, [justUpgraded, router]);
+  useEffect(() => { if (justUpgraded) router.replace("/app/billing"); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = useCallback(async () => {
     if (!token) return;
