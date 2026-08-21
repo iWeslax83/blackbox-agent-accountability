@@ -102,12 +102,21 @@ class Store:
             prev = e.hash
         return True
 
-    def sessions(self, org_id: str) -> list[dict]:
-        """One row per session in the org: id, event count, latest timestamp. Newest first."""
-        sql = ("SELECT session_id, count(*) AS events, max(ts) AS last_ts "
-               "FROM events WHERE org_id=%s GROUP BY session_id ORDER BY max(seq) DESC")
+    def sessions(self, org_id: str, q: Optional[str] = None,
+                limit: int = 50, offset: int = 0) -> list[dict]:
+        """Paginated, newest-first session summaries: id, event count, latest timestamp.
+        `q` filters by a case-insensitive substring match on session_id. Returning exactly
+        `limit` rows is the caller's signal that another page may exist (no separate count
+        query, to keep the common unpaginated call cheap and the response shape a plain list
+        that existing callers already expect)."""
+        where = "WHERE org_id=%s"
+        params: tuple = (org_id,)
+        if q:
+            where += " AND session_id ILIKE %s"; params += (f"%{q}%",)
+        sql = (f"SELECT session_id, count(*) AS events, max(ts) AS last_ts FROM events {where} "
+               "GROUP BY session_id ORDER BY max(seq) DESC LIMIT %s OFFSET %s")
         self._assert_scoped(org_id, sql)
         with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(sql, (org_id,))
+            cur.execute(sql, params + (limit, offset))
             rows = cur.fetchall()
         return [{"session_id": r["session_id"], "events": r["events"], "last_ts": r["last_ts"]} for r in rows]

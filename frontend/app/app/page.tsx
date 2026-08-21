@@ -10,10 +10,16 @@ type Event = { seq: number; session_id: string; kind: string; tool?: string; int
 type Verdict = { rule_id: string; severity: string; rationale: string };
 type SessionRow = { session_id: string; events: number; last_ts: string };
 
+const PAGE_SIZE = 25;
+
 export default function AppPage() {
   const { token, loading } = useSession();
   const router = useRouter();
   const [sessions, setSessions] = useState<SessionRow[]>([]);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sessionsLimit, setSessionsLimit] = useState(PAGE_SIZE);
+  const [hasMore, setHasMore] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
   const [verdicts, setVerdicts] = useState<Verdict[]>([]);
@@ -24,10 +30,22 @@ export default function AppPage() {
 
   useEffect(() => { if (!loading && !token) router.push("/login"); }, [loading, token, router]);
 
+  // Debounce: only refetch 300ms after the user stops typing, and reset to the first page.
+  useEffect(() => {
+    const t = setTimeout(() => { setDebouncedSearch(search); setSessionsLimit(PAGE_SIZE); }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const loadSessions = useCallback(async () => {
     if (!token) return;
-    try { setSessions(await apiFetch("/sessions", { token })); } catch (e) { setErr(String(e)); }
-  }, [token]);
+    try {
+      const params = new URLSearchParams({ limit: String(sessionsLimit) });
+      if (debouncedSearch) params.set("q", debouncedSearch);
+      const rows = await apiFetch(`/sessions?${params}`, { token }) as SessionRow[];
+      setSessions(rows);
+      setHasMore(rows.length === sessionsLimit);
+    } catch (e) { setErr(String(e)); }
+  }, [token, debouncedSearch, sessionsLimit]);
   useEffect(() => { loadSessions(); }, [loadSessions]);
 
   const load = useCallback(async (sid?: string) => {
@@ -96,7 +114,7 @@ export default function AppPage() {
         <h1 style={{ marginBottom: 6 }}>Sessions</h1>
         <p className="muted small">Pick a recorded agent session, verify its hash chain, and run the compliance tribunal.</p>
 
-        {sessions.length === 0 ? (
+        {sessions.length === 0 && !debouncedSearch ? (
           <div className="card" style={{ marginTop: 18, padding: 24 }}>
             <p className="small" style={{ marginBottom: 14 }}>
               A session is a recorded stream of an agent&rsquo;s actions (tool calls, messages) that
@@ -109,20 +127,31 @@ export default function AppPage() {
         ) : (
           <>
             <div className="toolbar">
+              <input className="input" placeholder="Search sessions…"
+                     value={search} onChange={e => setSearch(e.target.value)} />
               <input className="input" placeholder="…or paste a session id"
                      value={sessionId} onChange={e => setSessionId(e.target.value)} />
               <button className="btn btn-ghost" onClick={() => load()} disabled={!sessionId || busy === "load"}>
                 {busy === "load" ? "Loading…" : "Load"}
               </button>
             </div>
-            <ul className="list">
-              {sessions.map(s => (
-                <li key={s.session_id} style={{ cursor: "pointer" }} onClick={() => load(s.session_id)}>
-                  <span><strong>{s.session_id}</strong> <span className="meta">{s.events} events</span></span>
-                  <span className="meta">{s.session_id === sessionId ? "▶ selected" : "open"}</span>
-                </li>
-              ))}
-            </ul>
+            {sessions.length === 0 ? <p className="empty">No sessions match &ldquo;{debouncedSearch}&rdquo;.</p> : (
+              <ul className="list">
+                {sessions.map(s => (
+                  <li key={s.session_id} style={{ cursor: "pointer" }} onClick={() => load(s.session_id)}>
+                    <span><strong>{s.session_id}</strong> <span className="meta">{s.events} events</span></span>
+                    <span className="meta">{s.session_id === sessionId ? "▶ selected" : "open"}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {hasMore && (
+              <p style={{ marginTop: 12 }}>
+                <button className="btn btn-ghost btn-sm" onClick={() => setSessionsLimit(l => l + PAGE_SIZE)}>
+                  Load more
+                </button>
+              </p>
+            )}
           </>
         )}
 

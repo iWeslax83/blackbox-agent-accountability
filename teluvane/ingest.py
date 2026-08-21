@@ -90,8 +90,10 @@ def ingest(request: Request, e: Event, org_id: str = Depends(org_from_api_key)) 
 
 # ---- reads (human auth: JWT) ---------------------------------------------------------------
 @app.get("/sessions")
-def list_sessions(org_id: str = Depends(current_org)) -> list[dict]:
-    return store.sessions(org_id)
+def list_sessions(q: str | None = None, limit: int = 50, offset: int = 0,
+                  org_id: str = Depends(current_org)) -> list[dict]:
+    limit = max(1, min(limit, 200))
+    return store.sessions(org_id, q=q, limit=limit, offset=max(0, offset))
 
 @app.get("/events")
 def list_events(session_id: str | None = None, org_id: str = Depends(current_org)) -> list[Event]:

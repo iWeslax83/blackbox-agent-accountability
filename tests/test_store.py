@@ -56,7 +56,22 @@ def test_assert_scoped_rejects_unscoped_sql(store):
     lambda s: s.verify_chain(""),
     lambda s: s.append("", _ev()),
     lambda s: s.add_verdict("", _vd()),
+    lambda s: s.sessions(""),
 ])
 def test_every_public_method_requires_org(store, call):
     with pytest.raises(ValueError):
         call(store)
+
+def test_sessions_search_filters_by_substring(store):
+    store.append("orgA", _ev(session_id="alpha-1"))
+    store.append("orgA", _ev(session_id="beta-1"))
+    names = {s["session_id"] for s in store.sessions("orgA", q="alpha")}
+    assert names == {"alpha-1"}
+
+def test_sessions_pagination(store):
+    for i in range(5):
+        store.append("orgA", _ev(session_id=f"s{i}"))
+    page1 = store.sessions("orgA", limit=2, offset=0)
+    page2 = store.sessions("orgA", limit=2, offset=2)
+    assert len(page1) == 2 and len(page2) == 2
+    assert {s["session_id"] for s in page1} != {s["session_id"] for s in page2}
