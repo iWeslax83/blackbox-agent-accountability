@@ -19,6 +19,7 @@ export default function TopNav() {
           <a href="/app/keys">API keys</a>
           <a href="/app/billing">Billing</a>
           <a href="/app/settings">Settings</a>
+          <a href="/accessibility">Accessibility</a>
           <button className="btn btn-ghost btn-sm" onClick={logout}>Log out</button>
         </nav>
       </div>

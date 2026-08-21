@@ -13,6 +13,8 @@ export default function Footer() {
           <a href="/privacy" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Privacy</a>
           &nbsp;·&nbsp;
           <a href="/terms" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Terms</a>
+          &nbsp;·&nbsp;
+          <a href="/accessibility" className="landing-link" style={{ color: MUTED_ON_DARK, textDecoration: "none" }}>Accessibility</a>
         </div>
         <div style={{ fontSize: ".78rem", color: MUTED_ON_DARK, marginTop: ".25rem" }}>
           Bursa, Türkiye
