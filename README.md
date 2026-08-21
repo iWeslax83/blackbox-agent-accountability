@@ -91,6 +91,29 @@ Full production deploy (Supabase + Render + Vercel) is documented in [DEPLOY.md]
 
 ---
 
+## MCP server
+
+Any MCP-compatible agent (Claude Desktop, Claude Code, or anything else speaking the protocol)
+can auto-log its actions to TELUVANE without you writing recorder calls into the agent. Point
+an MCP client at `teluvane-mcp` (installed by `pip install -e .`) over stdio:
+
+```json
+{
+  "mcpServers": {
+    "teluvane": {
+      "command": "teluvane-mcp",
+      "env": { "TELUVANE_URL": "https://your-api.onrender.com", "TELUVANE_API_KEY": "tv_live_..." }
+    }
+  }
+}
+```
+
+It exposes `record_llm_call`, `record_tool_call`, and `record_tool_result`. One MCP server
+process is one recorded session by default, so a whole conversation lands in TELUVANE as a
+single auditable session.
+
+---
+
 ## Tests
 
 ```bash
@@ -102,15 +125,14 @@ cd frontend && npm test
 ```
 
 Coverage includes hash-chain integrity, tenant isolation, JWT/API-key auth, the offline and live
-tribunal, billing plan gating, custom policy rule merging, and the audit scheduler's due-check
-logic.
+tribunal, billing plan gating, custom policy rule merging, the audit scheduler's due-check logic,
+team invites, webhook delivery, session search/pagination, policy framework selection, and the
+MCP server's tool calls.
 
 ---
 
 ## Roadmap
 
-- MCP-server recorder so any MCP-compatible agent framework auto-logs to TELUVANE
-- Multi-framework evidence export (SOC 2, NIST AI RMF, ISO 42001)
 - A dedicated worker/cron service so scheduled tribunal runs don't depend on the API process
   staying warm
 
