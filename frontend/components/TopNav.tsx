@@ -14,6 +14,7 @@ export default function TopNav() {
         <a href="/app" className="brand"><span className="mark">T</span> TELUVANE</a>
         <nav className="navlinks">
           <a href="/app">Sessions</a>
+          <a href="/app/insights">Insights</a>
           <a href="/app/team">Team</a>
           <a href="/app/keys">API keys</a>
           <a href="/app/billing">Billing</a>

@@ -102,6 +102,22 @@ class Store:
             prev = e.hash
         return True
 
+    def violation_trend(self, org_id: str, days: int = 30) -> list[dict]:
+        """Confirmed-violation counts per UTC day for the last `days` days, oldest first,
+        zero-filled so a quiet day still appears (a chart with gaps reads as broken data)."""
+        days = max(1, min(days, 365))
+        sql = (
+            "SELECT d::date AS day, count(v.*) AS violations "
+            "FROM generate_series(current_date - (%s - 1) * interval '1 day', current_date, "
+            "interval '1 day') AS d "
+            "LEFT JOIN verdicts v ON v.org_id=%s AND v.violation AND v.ts::date = d::date "
+            "GROUP BY d ORDER BY d")
+        self._assert_scoped(org_id, sql)
+        with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (days, org_id))
+            rows = cur.fetchall()
+        return [{"date": r["day"].isoformat(), "violations": r["violations"]} for r in rows]
+
     def sessions(self, org_id: str, q: Optional[str] = None,
                 limit: int = 50, offset: int = 0) -> list[dict]:
         """Paginated, newest-first session summaries: id, event count, latest timestamp.

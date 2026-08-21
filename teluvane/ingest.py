@@ -111,6 +111,10 @@ def list_sessions(q: str | None = None, limit: int = 50, offset: int = 0,
 def list_events(session_id: str | None = None, org_id: str = Depends(current_org)) -> list[Event]:
     return store.events(org_id, session_id)
 
+@app.get("/stats/violations")
+def violation_trend(days: int = 30, org_id: str = Depends(current_org)) -> list[dict]:
+    return store.violation_trend(org_id, days=days)
+
 @app.get("/verdicts")
 def list_verdicts(session_id: str | None = None, org_id: str = Depends(current_org)) -> list[Verdict]:
     return store.verdicts(org_id, session_id)

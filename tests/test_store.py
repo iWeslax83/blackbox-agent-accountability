@@ -68,6 +68,16 @@ def test_sessions_search_filters_by_substring(store):
     names = {s["session_id"] for s in store.sessions("orgA", q="alpha")}
     assert names == {"alpha-1"}
 
+def test_violation_trend_is_zero_filled_and_counts_only_violations(store):
+    store.append("orgA", _ev())
+    store.add_verdict("orgA", _vd())                                    # a violation today
+    store.add_verdict("orgA", Verdict(session_id="s1", rule_id="r2", severity="low",
+                                      violation=False, confidence=0.1, evidence_seqs=[]))  # not a violation
+    trend = store.violation_trend("orgA", days=7)
+    assert len(trend) == 7                        # zero-filled for every day in the window
+    assert trend[-1]["violations"] == 1            # today: 1 confirmed violation, the non-violation doesn't count
+    assert all(d["violations"] == 0 for d in trend[:-1])
+
 def test_sessions_pagination(store):
     for i in range(5):
         store.append("orgA", _ev(session_id=f"s{i}"))
