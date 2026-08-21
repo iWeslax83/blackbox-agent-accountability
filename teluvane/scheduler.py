@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from .db import get_pool
 from .billing import org_plan
 from .byok import get_byok
+from .orgs import get_policy_framework
 from .auditlock import audited_run
 from .custom_rules import effective_pack
 
@@ -47,8 +48,10 @@ def _mark_ran(org_id: str) -> None:
         cur.execute("UPDATE org_audit_schedule SET last_run_at=now() WHERE org_id=%s", (org_id,))
         conn.commit()
 
-def run_due_schedules(store, pack, hosted_api_key: str | None = None) -> dict[str, int]:
-    """Re-audit every session for each org whose schedule is due. Pro-plan check is defense in
+def run_due_schedules(store, packs, hosted_api_key: str | None = None) -> dict[str, int]:
+    """Re-audit every session for each org whose schedule is due. `packs` is a
+    {framework_id: PolicyPack} mapping (ingest.FRAMEWORK_PACKS); each org's own
+    policy_framework selects which one it's audited against. Pro-plan check is defense in
     depth (writes to the schedule are already pro-gated at the API layer), so a downgraded org's
     schedule goes dormant instead of quietly continuing to run. Returns {org_id: sessions_run}."""
     ran: dict[str, int] = {}
@@ -56,7 +59,8 @@ def run_due_schedules(store, pack, hosted_api_key: str | None = None) -> dict[st
         if org_plan(org_id) != "pro":
             continue
         api_key = get_byok(org_id, "anthropic") or hosted_api_key
-        org_pack = effective_pack(org_id, pack)
+        base = packs.get(get_policy_framework(org_id)) or next(iter(packs.values()))
+        org_pack = effective_pack(org_id, base)
         sessions = store.sessions(org_id)
         for s in sessions:
             audited_run(store, org_id, s["session_id"], org_pack, api_key)

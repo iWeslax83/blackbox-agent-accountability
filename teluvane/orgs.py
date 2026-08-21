@@ -22,6 +22,17 @@ def org_for_user(user_id: str) -> Optional[str]:
         row = cur.fetchone()
     return row[0] if row else None
 
+def get_policy_framework(org_id: str) -> str:
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT policy_framework FROM orgs WHERE id=%s", (org_id,))
+        row = cur.fetchone()
+    return row[0] if row else "eu_ai_act"
+
+def set_policy_framework(org_id: str, framework: str) -> None:
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE orgs SET policy_framework=%s WHERE id=%s", (framework, org_id))
+        conn.commit()
+
 def member_role(org_id: str, user_id: str) -> Optional[str]:
     with get_pool().connection() as conn, conn.cursor() as cur:
         cur.execute("SELECT role FROM org_members WHERE org_id=%s AND user_id=%s",

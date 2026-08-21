@@ -15,8 +15,8 @@ from .auth import current_org, verify_jwt, verify_jwt_claims
 from .apikeys import org_from_api_key, create_api_key, list_api_keys, revoke_api_key
 from .orgs import (create_org, org_for_user, member_role, require_owner, list_members,
                    set_member_role, remove_member, create_invite, list_invites, revoke_invite,
-                   find_pending_invite, accept_invite)
-from .policy import load_policy_pack, Rule
+                   find_pending_invite, accept_invite, get_policy_framework, set_policy_framework)
+from .policy import load_policy_pack, Rule, PolicyPack
 from .custom_rules import list_custom_rules, upsert_custom_rule, delete_custom_rule, effective_pack
 from .byok import set_byok, get_byok, clear_byok, has_byok
 from .webhooks import set_webhook, get_webhook, delete_webhook
@@ -37,6 +37,18 @@ AUDIT_RATE_LIMIT = os.environ.get("AUDIT_RATE_LIMIT", "20/minute")
 POLICY_PATH = os.environ.get("TELUVANE_POLICY", "policies/eu_ai_act.yaml")
 _pack = load_policy_pack(POLICY_PATH)
 
+# Other built-in packs an org can pick instead of the default EU AI Act one. Filenames double
+# as the framework's identifier in the org_policy_framework column and the /orgs/framework API.
+FRAMEWORK_PACKS = {
+    "eu_ai_act": _pack,
+    "soc2": load_policy_pack("policies/soc2.yaml"),
+    "nist_ai_rmf": load_policy_pack("policies/nist_ai_rmf.yaml"),
+    "iso42001": load_policy_pack("policies/iso42001.yaml"),
+}
+
+def base_pack_for_org(org_id: str) -> PolicyPack:
+    return FRAMEWORK_PACKS.get(get_policy_framework(org_id), _pack)
+
 # ---- automated tribunal runs (Pro plan) ------------------------------------------------------
 # One in-process background thread, ticking every minute, re-audits any org whose schedule is
 # due (see scheduler.py for the tradeoffs of running this in-process rather than as a separate
@@ -47,7 +59,7 @@ _scheduler_stop = threading.Event()
 def _scheduler_loop() -> None:
     while not _scheduler_stop.wait(TICK_INTERVAL_SECONDS):
         try:
-            run_due_schedules(store, _pack, hosted_api_key=os.environ.get("TELUVANE_HOSTED_ANTHROPIC_KEY"))
+            run_due_schedules(store, FRAMEWORK_PACKS, hosted_api_key=os.environ.get("TELUVANE_HOSTED_ANTHROPIC_KEY"))
         except Exception:
             logging.exception("scheduled tribunal tick failed")
 
@@ -117,14 +129,28 @@ def audit_session(request: Request, session_id: str, org_id: str = Depends(curre
         api_key = os.environ.get("TELUVANE_HOSTED_ANTHROPIC_KEY")
         if api_key:
             increment_hosted_audit_usage(org_id)
-    pack = effective_pack(org_id, _pack) if org_plan(org_id) == "pro" else _pack
+    base = base_pack_for_org(org_id)
+    pack = effective_pack(org_id, base) if org_plan(org_id) == "pro" else base
     return audited_run(store, org_id, session_id, pack, api_key)   # still None -> offline audit
+
+# ---- policy framework selection (human auth: JWT) -------------------------------------------
+@app.get("/orgs/framework")
+def get_framework_ep(org_id: str = Depends(current_org)) -> dict:
+    return {"framework": get_policy_framework(org_id), "available": list(FRAMEWORK_PACKS)}
+
+@app.put("/orgs/framework")
+def put_framework_ep(framework: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:
+    if framework not in FRAMEWORK_PACKS:
+        raise HTTPException(status_code=400, detail=f"unknown framework, choose one of {list(FRAMEWORK_PACKS)}")
+    set_policy_framework(org_id, framework)
+    return {"framework": framework}
 
 # ---- custom policy rules (human auth: JWT, Pro plan to write) ------------------------------
 @app.get("/policy/rules")
 def get_policy_rules(org_id: str = Depends(current_org)) -> list[dict]:
+    base_pack = base_pack_for_org(org_id)
     custom_ids = {r.id for r in list_custom_rules(org_id)}
-    base = [{**r.model_dump(), "custom": r.id in custom_ids} for r in _pack.rules if r.id not in custom_ids]
+    base = [{**r.model_dump(), "custom": r.id in custom_ids} for r in base_pack.rules if r.id not in custom_ids]
     custom = [{**r.model_dump(), "custom": True} for r in list_custom_rules(org_id)]
     return base + custom
 
@@ -193,7 +219,7 @@ def evidence(session_id: str, org_id: str = Depends(current_org)) -> str:
     events = store.events(org_id, session_id)
     verdicts = store.verdicts(org_id, session_id)
     pack = build_evidence_pack(session_id, events, verdicts,
-                               framework=_pack.framework, chain_intact=store.verify_chain(org_id, session_id))
+                               framework=base_pack_for_org(org_id).framework, chain_intact=store.verify_chain(org_id, session_id))
     return pack["html"]
 
 @app.get("/evidence/{session_id}/pdf")
@@ -204,7 +230,7 @@ def evidence_pdf(session_id: str, org_id: str = Depends(current_org)) -> Respons
     events = store.events(org_id, session_id)
     verdicts = store.verdicts(org_id, session_id)
     pdf = build_evidence_pdf(session_id, events, verdicts,
-                             framework=_pack.framework, chain_intact=store.verify_chain(org_id, session_id))
+                             framework=base_pack_for_org(org_id).framework, chain_intact=store.verify_chain(org_id, session_id))
     return Response(content=pdf, media_type="application/pdf",
                     headers={"Content-Disposition": f'attachment; filename="{session_id}-evidence.pdf"'})
 

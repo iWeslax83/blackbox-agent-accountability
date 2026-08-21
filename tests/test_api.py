@@ -103,6 +103,29 @@ def test_webhook_endpoints_and_audit_fires_it(client, monkeypatch):
     r2 = client.delete("/webhooks", headers=h)
     assert r2.status_code == 200 and client.get("/webhooks", headers=h).json()["url"] is None
 
+def test_policy_framework_selection_changes_which_rules_apply(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+
+    assert client.get("/orgs/framework", headers=h).json()["framework"] == "eu_ai_act"
+
+    r = client.put("/orgs/framework", json={"framework": "nope"}, headers=h)
+    assert r.status_code == 400
+
+    r2 = client.put("/orgs/framework", json={"framework": "soc2"}, headers=h)
+    assert r2.status_code == 200 and r2.json()["framework"] == "soc2"
+
+    rules = {r["id"] for r in client.get("/policy/rules", headers=h).json()}
+    assert "unauthorized_access_attempt" in rules   # SOC2 rule
+    assert "data_exfiltration" not in rules         # EU AI Act rule, no longer active
+
+    client.post("/events", json={"agent_id": "a", "session_id": "soc2-sess", "kind": "tool_call",
+                "tool": "deploy", "args": {}, "intent": "production deploy without review"},
+                headers={"Authorization": f"Bearer {key}"})
+    r3 = client.post("/audit/soc2-sess", headers=h)
+    assert any(v["rule_id"] == "change_without_approval" and v["violation"] for v in r3.json())
+
 def test_custom_policy_rule_requires_pro_and_feeds_offline_audit(client):
     org = create_org("Acme", "u1")
     key = create_api_key(org, "ci")

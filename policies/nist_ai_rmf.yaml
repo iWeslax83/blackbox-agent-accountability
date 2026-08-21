@@ -1,0 +1,34 @@
+# teluvane/policies/nist_ai_rmf.yaml
+framework: "NIST AI RMF"
+version: "2026-draft"
+rules:
+  - id: unmanaged_ai_risk
+    description: "Agent takes a consequential action outside any documented risk tolerance or approval workflow."
+    severity: high
+    framework_ref: "GOVERN 1.1 risk management process"
+    detector_hint: "tool_call with real-world effect (payment, deletion, external comms) and approved_by null."
+    keywords: ["without approval", "no oversight", "auto-approved", "bypassed review"]
+  - id: lack_of_transparency
+    description: "Agent output or decision cannot be traced back to a recorded rationale."
+    severity: medium
+    framework_ref: "MAP 1.1 context and traceability"
+    detector_hint: "tool_call or llm_call with empty or generic intent, no evidence of why the action was taken."
+    keywords: ["no reason given", "unexplained", "black box"]
+  - id: prompt_injection_exploited
+    description: "Agent followed instructions injected into its input that contradict its system policy."
+    severity: critical
+    framework_ref: "GOVERN 6.1 third-party and supply chain risk"
+    detector_hint: "intent or output shows the agent obeying embedded text like 'ignore previous instructions'."
+    keywords: ["ignore previous", "disregard instructions", "override", "jailbreak"]
+  - id: inadequate_human_oversight
+    description: "A state-changing or high-impact action proceeded without the human review the deployment requires."
+    severity: high
+    framework_ref: "MANAGE 2.2 human oversight mechanisms"
+    detector_hint: "tool_call that mutates state (delete/transfer/send/deploy) with approved_by null or 'auto' where policy requires a human."
+    keywords: ["delete", "transfer funds", "wipe", "auto-approved"]
+  - id: harmful_or_biased_output
+    description: "Agent output contains language flagged as discriminatory, harmful, or otherwise inconsistent with fairness requirements."
+    severity: high
+    framework_ref: "MEASURE 2.11 fairness and bias"
+    detector_hint: "output contains slurs, discriminatory language, or content the org has flagged as harmful."
+    keywords: ["discriminat", "biased output", "harmful content"]

@@ -6,6 +6,10 @@ import { useConfirm } from "@/lib/useConfirm";
 import TopNav from "@/components/TopNav";
 
 type PolicyRule = { id: string; description: string; severity: string; keywords: string[]; custom: boolean };
+type FrameworkInfo = { framework: string; available: string[] };
+const FRAMEWORK_LABELS: Record<string, string> = {
+  eu_ai_act: "EU AI Act", soc2: "SOC 2", nist_ai_rmf: "NIST AI RMF", iso42001: "ISO/IEC 42001",
+};
 type Schedule = { enabled: boolean; interval_minutes: number; last_run_at: string | null };
 type Webhook = { url: string | null; secret: string | null };
 
@@ -37,6 +41,27 @@ export default function SettingsPage() {
     catch (e) { setRuleErr(String(e)); }
   }, [token]);
   useEffect(() => { refreshRules(); }, [refreshRules]);
+
+  const [frameworkInfo, setFrameworkInfo] = useState<FrameworkInfo | null>(null);
+  const [frameworkBusy, setFrameworkBusy] = useState(false);
+  const [frameworkErr, setFrameworkErr] = useState<string | null>(null);
+
+  const refreshFramework = useCallback(async () => {
+    if (!token) return;
+    try { setFrameworkInfo(await apiFetch("/orgs/framework", { token }) as FrameworkInfo); }
+    catch (e) { setFrameworkErr(String(e)); }
+  }, [token]);
+  useEffect(() => { refreshFramework(); }, [refreshFramework]);
+
+  async function changeFramework(framework: string) {
+    if (!token) return;
+    setFrameworkErr(null); setFrameworkBusy(true);
+    try {
+      await apiFetch("/orgs/framework", { token, method: "PUT", body: { framework } });
+      await Promise.all([refreshFramework(), refreshRules()]);
+      confirm.show("Framework updated");
+    } catch (e) { setFrameworkErr(String(e)); } finally { setFrameworkBusy(false); }
+  }
 
   async function save() {
     if (!token || !key) return;
@@ -158,10 +183,25 @@ export default function SettingsPage() {
 
         <p className="notice">Your key is encrypted at rest and decrypted only in-memory while running your audits. It is never logged.</p>
 
+        <div className="section-title"><h2>Compliance framework</h2></div>
+        <p className="muted small">Which built-in policy pack the tribunal audits against.</p>
+        <div className="card" style={{ padding: 24, marginBottom: 18 }}>
+          <div className="field">
+            <label className="label">Framework</label>
+            <select className="input" value={frameworkInfo?.framework ?? "eu_ai_act"}
+                    onChange={e => changeFramework(e.target.value)} disabled={frameworkBusy}>
+              {(frameworkInfo?.available ?? ["eu_ai_act"]).map(f => (
+                <option key={f} value={f}>{FRAMEWORK_LABELS[f] ?? f}</option>
+              ))}
+            </select>
+          </div>
+          {frameworkErr && <p className="error">{frameworkErr}</p>}
+        </div>
+
         <div className="section-title"><h2>Custom policy rules</h2></div>
         <p className="muted small">
-          Add rules on top of the built-in EU AI Act pack. Each rule flags a session when any
-          of its keywords appear in the action log, and feeds both the offline detector and the
+          Add rules on top of the {FRAMEWORK_LABELS[frameworkInfo?.framework ?? "eu_ai_act"]} pack.
+          Each rule flags a session when any of its keywords appear in the action log, and feeds both the offline detector and the
           live tribunal. Pro plan only.
         </p>
 

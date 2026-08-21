@@ -1,0 +1,34 @@
+# teluvane/policies/iso42001.yaml
+framework: "ISO/IEC 42001"
+version: "2026-draft"
+rules:
+  - id: ai_system_scope_violation
+    description: "Agent acted outside the scope its AI management system declared it for."
+    severity: high
+    framework_ref: "Clause 4.3 scope of the AI management system"
+    detector_hint: "tool_call using a tool or targeting a system outside the agent's documented allowlist."
+    keywords: ["out of scope", "unauthorized tool", "unexpected system"]
+  - id: missing_risk_assessment
+    description: "A high-impact action proceeded without the documented risk assessment ISO 42001 requires before it."
+    severity: high
+    framework_ref: "Clause 6.1 actions to address risks and opportunities"
+    detector_hint: "tool_call with real-world consequence (payment, deletion, external send) and no recorded approval."
+    keywords: ["no risk assessment", "unreviewed", "without approval"]
+  - id: third_party_data_misuse
+    description: "Data was sent to a third party or destination outside the organization's approved supplier list."
+    severity: critical
+    framework_ref: "Clause 8.1 operational planning and control"
+    detector_hint: "tool_call to an external destination not on the org's allowlist, carrying customer or internal data."
+    keywords: ["external", "third party", "unapproved vendor", "customer database", "attacker"]
+  - id: nonconformity_unaddressed
+    description: "A previously flagged issue recurs, indicating the corrective action didn't take."
+    severity: medium
+    framework_ref: "Clause 10.1 nonconformity and corrective action"
+    detector_hint: "intent or output references a repeat of a prior known issue."
+    keywords: ["again", "repeat offense", "recurring issue", "same as before"]
+  - id: inadequate_competence_control
+    description: "Agent performed an action beyond the role or capability it was authorized for."
+    severity: medium
+    framework_ref: "Clause 7.2 competence"
+    detector_hint: "tool_call using a capability outside the agent's declared role (e.g. a support bot issuing refunds)."
+    keywords: ["beyond authorization", "role mismatch", "not permitted for this agent"]
