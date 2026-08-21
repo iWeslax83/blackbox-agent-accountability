@@ -12,7 +12,8 @@ from .store import Store
 from .auth import current_org, verify_jwt
 from .apikeys import org_from_api_key, create_api_key, list_api_keys, revoke_api_key
 from .orgs import create_org, org_for_user
-from .policy import load_policy_pack
+from .policy import load_policy_pack, Rule
+from .custom_rules import list_custom_rules, upsert_custom_rule, delete_custom_rule, effective_pack
 from .byok import set_byok, get_byok, clear_byok, has_byok
 from .auditlock import audited_run
 from .logging_config import configure_logging
@@ -87,7 +88,32 @@ def audit_session(request: Request, session_id: str, org_id: str = Depends(curre
         api_key = os.environ.get("TELUVANE_HOSTED_ANTHROPIC_KEY")
         if api_key:
             increment_hosted_audit_usage(org_id)
-    return audited_run(store, org_id, session_id, _pack, api_key)   # still None -> offline audit
+    pack = effective_pack(org_id, _pack) if org_plan(org_id) == "pro" else _pack
+    return audited_run(store, org_id, session_id, pack, api_key)   # still None -> offline audit
+
+# ---- custom policy rules (human auth: JWT, Pro plan to write) ------------------------------
+@app.get("/policy/rules")
+def get_policy_rules(org_id: str = Depends(current_org)) -> list[dict]:
+    custom_ids = {r.id for r in list_custom_rules(org_id)}
+    base = [{**r.model_dump(), "custom": r.id in custom_ids} for r in _pack.rules if r.id not in custom_ids]
+    custom = [{**r.model_dump(), "custom": True} for r in list_custom_rules(org_id)]
+    return base + custom
+
+@app.put("/policy/rules/{rule_id}")
+def put_policy_rule(rule_id: str, description: str = Body(...), severity: str = Body(...),
+                    keywords: list[str] = Body(default=[]), framework_ref: str = Body(default="Custom"),
+                    detector_hint: str = Body(default=""), org_id: str = Depends(current_org)) -> dict:
+    if org_plan(org_id) != "pro":
+        raise HTTPException(status_code=402, detail="Custom policy rules require the Pro plan")
+    upsert_custom_rule(org_id, Rule(id=rule_id, description=description, severity=severity,
+                                    framework_ref=framework_ref, detector_hint=detector_hint,
+                                    keywords=keywords))
+    return {"id": rule_id}
+
+@app.delete("/policy/rules/{rule_id}")
+def delete_policy_rule(rule_id: str, org_id: str = Depends(current_org)) -> dict:
+    delete_custom_rule(org_id, rule_id)
+    return {"deleted": rule_id}
 
 @app.put("/byok")
 def put_byok(key: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:

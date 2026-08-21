@@ -75,6 +75,36 @@ def test_byok_status_and_offline_audit(client):
     assert r.status_code == 200
     assert any(v["rule_id"] == "data_exfiltration" and v["violation"] for v in r.json())
 
+def test_custom_policy_rule_requires_pro_and_feeds_offline_audit(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    client.post("/events", json={"agent_id": "a", "session_id": "cr-sess", "kind": "tool_call",
+                "tool": "wire_transfer", "args": {}, "intent": "move funds offshore"},
+                headers={"Authorization": f"Bearer {key}"})
+
+    body = {"description": "No offshore transfers", "severity": "high", "keywords": ["offshore"]}
+    r = client.put("/policy/rules/no_offshore", json=body, headers=h)
+    assert r.status_code == 402   # free plan
+
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE orgs SET plan='pro' WHERE id=%s", (org,))
+        conn.commit()
+
+    r2 = client.put("/policy/rules/no_offshore", json=body, headers=h)
+    assert r2.status_code == 200
+
+    rules = client.get("/policy/rules", headers=h).json()
+    assert any(r["id"] == "no_offshore" and r["custom"] for r in rules)
+
+    r3 = client.post("/audit/cr-sess", headers=h)   # no BYOK -> offline detector, custom rule included
+    assert r3.status_code == 200
+    assert any(v["rule_id"] == "no_offshore" and v["violation"] for v in r3.json())
+
+    r4 = client.delete("/policy/rules/no_offshore", headers=h)
+    assert r4.status_code == 200
+    assert not any(r["id"] == "no_offshore" for r in client.get("/policy/rules", headers=h).json())
+
 def test_pdf_evidence_export_requires_pro_plan(client):
     org = create_org("Acme", "u1")
     key = create_api_key(org, "ci")
