@@ -23,4 +23,11 @@ describe("apiFetch", () => {
     (fetch as any).mockResolvedValueOnce(new Response("nope", { status: 401 }));
     await expect(apiFetch("/keys", { token: "t" })).rejects.toThrow();
   });
+  it("aborts and throws instead of hanging forever when the server never responds", async () => {
+    vi.stubGlobal("fetch", vi.fn((_url: string, init: RequestInit) =>
+      new Promise((_resolve, reject) => {
+        init.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+      })));
+    await expect(apiFetch("/verify", { token: "t", timeoutMs: 5 })).rejects.toThrow(/timed out/);
+  });
 });
