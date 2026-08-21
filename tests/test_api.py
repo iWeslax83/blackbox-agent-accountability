@@ -74,3 +74,21 @@ def test_byok_status_and_offline_audit(client):
     r = client.post("/audit/x", headers=h)        # no BYOK -> offline detector
     assert r.status_code == 200
     assert any(v["rule_id"] == "data_exfiltration" and v["violation"] for v in r.json())
+
+def test_pdf_evidence_export_requires_pro_plan(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    client.post("/events", json=_event("pdf-sess"), headers={"Authorization": f"Bearer {key}"})
+
+    r = client.get("/evidence/pdf-sess/pdf", headers=h)   # free plan by default
+    assert r.status_code == 402
+
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE orgs SET plan='pro' WHERE id=%s", (org,))
+        conn.commit()
+
+    r2 = client.get("/evidence/pdf-sess/pdf", headers=h)
+    assert r2.status_code == 200
+    assert r2.headers["content-type"] == "application/pdf"
+    assert r2.content.startswith(b"%PDF-")

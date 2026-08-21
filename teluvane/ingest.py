@@ -16,7 +16,7 @@ from .policy import load_policy_pack
 from .byok import set_byok, get_byok, clear_byok, has_byok
 from .auditlock import audited_run
 from .logging_config import configure_logging
-from .evidence import build_evidence_pack
+from .evidence import build_evidence_pack, build_evidence_pdf
 from .billing import create_checkout_session, create_portal_session, handle_webhook, org_plan
 from .usage import (HOSTED_AUDIT_MONTHLY_LIMIT, hosted_audit_count,
                      increment_hosted_audit_usage, under_hosted_audit_limit)
@@ -110,6 +110,18 @@ def evidence(session_id: str, org_id: str = Depends(current_org)) -> str:
     pack = build_evidence_pack(session_id, events, verdicts,
                                framework=_pack.framework, chain_intact=store.verify_chain(org_id, session_id))
     return pack["html"]
+
+@app.get("/evidence/{session_id}/pdf")
+def evidence_pdf(session_id: str, org_id: str = Depends(current_org)) -> Response:
+    # PDF export is a Pro-plan perk (per the pricing page); free orgs get the HTML pack above.
+    if org_plan(org_id) != "pro":
+        raise HTTPException(status_code=402, detail="PDF evidence export requires the Pro plan")
+    events = store.events(org_id, session_id)
+    verdicts = store.verdicts(org_id, session_id)
+    pdf = build_evidence_pdf(session_id, events, verdicts,
+                             framework=_pack.framework, chain_intact=store.verify_chain(org_id, session_id))
+    return Response(content=pdf, media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{session_id}-evidence.pdf"'})
 
 # ---- demo seeding (human auth: JWT) --------------------------------------------------------
 @app.post("/demo/seed")

@@ -14,6 +14,14 @@ def build_evidence_pack(session_id: str, events: list[Event], verdicts: list[Ver
     return {"json": js, "html": _render_html(session_id, framework, summary,
                                              violations, events)}
 
+def build_evidence_pdf(session_id: str, events: list[Event], verdicts: list[Verdict],
+                       framework: str, chain_intact: bool) -> bytes:
+    # Imported lazily: weasyprint pulls in cairo/pango bindings that only the PDF export
+    # path needs, so the rest of the API can boot even if that native stack is unavailable.
+    from weasyprint import HTML
+    pack = build_evidence_pack(session_id, events, verdicts, framework, chain_intact)
+    return HTML(string=pack["html"]).write_pdf()
+
 _SEV_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 
 def _highest_sev(vs: list[Verdict]) -> str:

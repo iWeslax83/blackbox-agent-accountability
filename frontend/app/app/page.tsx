@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/useSession";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiFetchBlob } from "@/lib/api";
 import { useConfirm } from "@/lib/useConfirm";
 import TopNav from "@/components/TopNav";
 
@@ -18,7 +18,7 @@ export default function AppPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [verdicts, setVerdicts] = useState<Verdict[]>([]);
   const [chain, setChain] = useState<boolean | null>(null);
-  const [busy, setBusy] = useState<"" | "load" | "audit" | "demo">("");
+  const [busy, setBusy] = useState<"" | "load" | "audit" | "demo" | "pdf">("");
   const [err, setErr] = useState<string | null>(null);
   const confirm = useConfirm();
 
@@ -71,6 +71,22 @@ export default function AppPage() {
     } catch (e) { setErr(String(e)); }
   }
 
+  async function downloadEvidencePdf() {
+    if (!token || !sessionId) return;
+    setErr(null); setBusy("pdf");
+    try {
+      const blob = await apiFetchBlob(`/evidence/${encodeURIComponent(sessionId)}/pdf`, { token });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `${sessionId}-evidence.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (e) {
+      const msg = String(e);
+      setErr(msg.includes("402") ? "PDF evidence export is a Pro plan feature." : msg);
+    } finally { setBusy(""); }
+  }
+
   if (loading) return <main className="page"><p className="muted">Loading…</p></main>;
   return (
     <>
@@ -121,6 +137,9 @@ export default function AppPage() {
                   {busy === "audit" ? "Auditing…" : "Run tribunal audit"}
                 </button>
                 <button className="btn btn-ghost btn-sm" onClick={openEvidence}>Evidence pack ↗</button>
+                <button className="btn btn-ghost btn-sm" onClick={downloadEvidencePdf} disabled={busy === "pdf"}>
+                  {busy === "pdf" ? "Preparing PDF…" : "Download PDF"}
+                </button>
                 {confirm.message && <span className="confirm" aria-live="polite">{confirm.message}</span>}
               </div>
             </div>
