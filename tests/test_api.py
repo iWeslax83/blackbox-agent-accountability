@@ -105,6 +105,26 @@ def test_custom_policy_rule_requires_pro_and_feeds_offline_audit(client):
     assert r4.status_code == 200
     assert not any(r["id"] == "no_offshore" for r in client.get("/policy/rules", headers=h).json())
 
+def test_schedule_requires_pro_plan(client):
+    create_org("Acme", "u1")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    assert client.get("/schedule", headers=h).json()["enabled"] is False
+
+    r = client.put("/schedule", json={"enabled": True, "interval_minutes": 30}, headers=h)
+    assert r.status_code == 402
+
+    org = None
+    with get_pool().connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT id FROM orgs WHERE owner_user_id='u1'")
+        org = cur.fetchone()[0]
+        cur.execute("UPDATE orgs SET plan='pro' WHERE id=%s", (org,))
+        conn.commit()
+
+    r2 = client.put("/schedule", json={"enabled": True, "interval_minutes": 30}, headers=h)
+    assert r2.status_code == 200
+    assert client.get("/schedule", headers=h).json() == {
+        "enabled": True, "interval_minutes": 30, "last_run_at": None}
+
 def test_pdf_evidence_export_requires_pro_plan(client):
     org = create_org("Acme", "u1")
     key = create_api_key(org, "ci")

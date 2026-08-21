@@ -1,6 +1,8 @@
 # teluvane/teluvane/ingest.py
 import logging
 import os
+import threading
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Body, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -19,25 +21,47 @@ from .auditlock import audited_run
 from .logging_config import configure_logging
 from .evidence import build_evidence_pack, build_evidence_pdf
 from .billing import create_checkout_session, create_portal_session, handle_webhook, org_plan
+from .scheduler import get_schedule, set_schedule, run_due_schedules, TICK_INTERVAL_SECONDS
 from .usage import (HOSTED_AUDIT_MONTHLY_LIMIT, hosted_audit_count,
                      increment_hosted_audit_usage, under_hosted_audit_limit)
 
 store = Store()
-app = FastAPI(title="TELUVANE")
-_origins = [o for o in os.environ.get("FRONTEND_ORIGIN", "").split(",") if o] or ["*"]
-app.add_middleware(CORSMiddleware, allow_origins=_origins,
-                   allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
 configure_logging()
-
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 EVENTS_RATE_LIMIT = os.environ.get("EVENTS_RATE_LIMIT", "120/minute")
 AUDIT_RATE_LIMIT = os.environ.get("AUDIT_RATE_LIMIT", "20/minute")
 
 POLICY_PATH = os.environ.get("TELUVANE_POLICY", "policies/eu_ai_act.yaml")
 _pack = load_policy_pack(POLICY_PATH)
+
+# ---- automated tribunal runs (Pro plan) ------------------------------------------------------
+# One in-process background thread, ticking every minute, re-audits any org whose schedule is
+# due (see scheduler.py for the tradeoffs of running this in-process rather than as a separate
+# worker/cron service). Not started under pytest's plain TestClient(app) since that never fires
+# the lifespan; only a `with TestClient(app) as c:` context manager would.
+_scheduler_stop = threading.Event()
+
+def _scheduler_loop() -> None:
+    while not _scheduler_stop.wait(TICK_INTERVAL_SECONDS):
+        try:
+            run_due_schedules(store, _pack, hosted_api_key=os.environ.get("TELUVANE_HOSTED_ANTHROPIC_KEY"))
+        except Exception:
+            logging.exception("scheduled tribunal tick failed")
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    threading.Thread(target=_scheduler_loop, daemon=True).start()
+    yield
+    _scheduler_stop.set()
+
+app = FastAPI(title="TELUVANE", lifespan=_lifespan)
+_origins = [o for o in os.environ.get("FRONTEND_ORIGIN", "").split(",") if o] or ["*"]
+app.add_middleware(CORSMiddleware, allow_origins=_origins,
+                   allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ---- health / readiness (no auth) ----------------------------------------------------------
 @app.get("/health")
@@ -114,6 +138,18 @@ def put_policy_rule(rule_id: str, description: str = Body(...), severity: str = 
 def delete_policy_rule(rule_id: str, org_id: str = Depends(current_org)) -> dict:
     delete_custom_rule(org_id, rule_id)
     return {"deleted": rule_id}
+
+@app.get("/schedule")
+def get_schedule_ep(org_id: str = Depends(current_org)) -> dict:
+    return get_schedule(org_id)
+
+@app.put("/schedule")
+def put_schedule_ep(enabled: bool = Body(...), interval_minutes: int = Body(60),
+                    org_id: str = Depends(current_org)) -> dict:
+    if org_plan(org_id) != "pro":
+        raise HTTPException(status_code=402, detail="Automated tribunal runs require the Pro plan")
+    set_schedule(org_id, enabled, interval_minutes)
+    return get_schedule(org_id)
 
 @app.put("/byok")
 def put_byok(key: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:

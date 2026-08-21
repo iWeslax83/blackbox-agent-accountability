@@ -6,6 +6,7 @@ import { useConfirm } from "@/lib/useConfirm";
 import TopNav from "@/components/TopNav";
 
 type PolicyRule = { id: string; description: string; severity: string; keywords: string[]; custom: boolean };
+type Schedule = { enabled: boolean; interval_minutes: number; last_run_at: string | null };
 
 export default function SettingsPage() {
   const { token } = useSession();
@@ -68,6 +69,33 @@ export default function SettingsPage() {
     if (!token) return;
     try { await apiFetch(`/policy/rules/${encodeURIComponent(id)}`, { token, method: "DELETE" }); await refreshRules(); }
     catch (e) { setRuleErr(String(e)); }
+  }
+
+  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [scheduleInterval, setScheduleInterval] = useState(60);
+  const [scheduleErr, setScheduleErr] = useState<string | null>(null);
+  const [scheduleBusy, setScheduleBusy] = useState(false);
+
+  const refreshSchedule = useCallback(async () => {
+    if (!token) return;
+    try {
+      const s = await apiFetch("/schedule", { token }) as Schedule;
+      setSchedule(s); setScheduleInterval(s.interval_minutes);
+    } catch (e) { setScheduleErr(String(e)); }
+  }, [token]);
+  useEffect(() => { refreshSchedule(); }, [refreshSchedule]);
+
+  async function saveSchedule(enabled: boolean) {
+    if (!token) return;
+    setScheduleErr(null); setScheduleBusy(true);
+    try {
+      await apiFetch("/schedule", { token, method: "PUT",
+        body: { enabled, interval_minutes: scheduleInterval } });
+      await refreshSchedule();
+    } catch (e) {
+      const msg = String(e);
+      setScheduleErr(msg.includes("402") ? "Automated tribunal runs are a Pro plan feature." : msg);
+    } finally { setScheduleBusy(false); }
   }
 
   return (
@@ -158,6 +186,41 @@ export default function SettingsPage() {
             </button>
           </div>
           {ruleErr && <p className="error">{ruleErr}</p>}
+        </div>
+
+        <div className="section-title"><h2>Automated tribunal runs</h2></div>
+        <p className="muted small">
+          Re-audit every session on a timer instead of clicking &ldquo;Run tribunal audit&rdquo;
+          by hand. Runs while the API is warm, on the interval below. Pro plan only.
+        </p>
+
+        <div className="card" style={{ padding: 24 }}>
+          <div className="row" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <span className="label" style={{ margin: 0 }}>Status</span>
+            <span className={`badge ${schedule?.enabled ? "ok" : ""}`}>
+              {schedule === null ? "checking…" : schedule.enabled ? "enabled" : "disabled"}
+            </span>
+            {schedule?.last_run_at && (
+              <span className="meta">last ran {new Date(schedule.last_run_at).toLocaleString()}</span>
+            )}
+          </div>
+          <div className="field">
+            <label className="label">Interval (minutes, minimum 15)</label>
+            <input className="input" type="number" min={15} value={scheduleInterval}
+                   onChange={e => setScheduleInterval(Math.max(15, Number(e.target.value) || 15))} />
+          </div>
+          <div className="btn-row">
+            <button className="btn btn-primary" style={{ width: "auto" }}
+                    onClick={() => saveSchedule(true)} disabled={scheduleBusy}>
+              {scheduleBusy ? "Saving…" : schedule?.enabled ? "Update interval" : "Enable"}
+            </button>
+            {schedule?.enabled && (
+              <button className="btn btn-ghost" onClick={() => saveSchedule(false)} disabled={scheduleBusy}>
+                Disable
+              </button>
+            )}
+          </div>
+          {scheduleErr && <p className="error">{scheduleErr}</p>}
         </div>
       </main>
     </>
