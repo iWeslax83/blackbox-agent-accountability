@@ -19,6 +19,7 @@ from .orgs import (create_org, org_for_user, member_role, require_owner, list_me
 from .policy import load_policy_pack, Rule
 from .custom_rules import list_custom_rules, upsert_custom_rule, delete_custom_rule, effective_pack
 from .byok import set_byok, get_byok, clear_byok, has_byok
+from .webhooks import set_webhook, get_webhook, delete_webhook
 from .auditlock import audited_run
 from .logging_config import configure_logging
 from .evidence import build_evidence_pack, build_evidence_pdf
@@ -166,6 +167,24 @@ def get_byok_status(org_id: str = Depends(current_org)) -> dict:
 def delete_byok(org_id: str = Depends(current_org)) -> dict:
     clear_byok(org_id, "anthropic")
     return {"configured": False}
+
+# ---- webhook (human auth: JWT) ----------------------------------------------------------------
+@app.get("/webhooks")
+def get_webhook_ep(org_id: str = Depends(current_org)) -> dict:
+    hook = get_webhook(org_id)
+    return hook if hook else {"url": None, "secret": None}
+
+@app.put("/webhooks")
+def put_webhook_ep(url: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:
+    if not url.startswith("https://") and not url.startswith("http://"):
+        raise HTTPException(status_code=400, detail="webhook url must be http(s)")
+    secret = set_webhook(org_id, url)
+    return {"url": url, "secret": secret}
+
+@app.delete("/webhooks")
+def delete_webhook_ep(org_id: str = Depends(current_org)) -> dict:
+    delete_webhook(org_id)
+    return {"url": None, "secret": None}
 
 @app.get("/evidence/{session_id}", response_class=HTMLResponse)
 def evidence(session_id: str, org_id: str = Depends(current_org)) -> str:

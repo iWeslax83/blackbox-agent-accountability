@@ -7,6 +7,7 @@ import TopNav from "@/components/TopNav";
 
 type PolicyRule = { id: string; description: string; severity: string; keywords: string[]; custom: boolean };
 type Schedule = { enabled: boolean; interval_minutes: number; last_run_at: string | null };
+type Webhook = { url: string | null; secret: string | null };
 
 export default function SettingsPage() {
   const { token } = useSession();
@@ -96,6 +97,32 @@ export default function SettingsPage() {
       const msg = String(e);
       setScheduleErr(msg.includes("402") ? "Automated tribunal runs are a Pro plan feature." : msg);
     } finally { setScheduleBusy(false); }
+  }
+
+  const [webhook, setWebhook] = useState<Webhook | null>(null);
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [webhookErr, setWebhookErr] = useState<string | null>(null);
+  const [webhookBusy, setWebhookBusy] = useState(false);
+
+  const refreshWebhook = useCallback(async () => {
+    if (!token) return;
+    try {
+      const w = await apiFetch("/webhooks", { token }) as Webhook;
+      setWebhook(w); setWebhookUrl(w.url ?? "");
+    } catch (e) { setWebhookErr(String(e)); }
+  }, [token]);
+  useEffect(() => { refreshWebhook(); }, [refreshWebhook]);
+
+  async function saveWebhook() {
+    if (!token || !webhookUrl) return;
+    setWebhookErr(null); setWebhookBusy(true);
+    try { await apiFetch("/webhooks", { token, method: "PUT", body: { url: webhookUrl } }); await refreshWebhook(); confirm.show("Webhook saved"); }
+    catch (e) { setWebhookErr(String(e)); } finally { setWebhookBusy(false); }
+  }
+  async function clearWebhook() {
+    if (!token) return;
+    try { await apiFetch("/webhooks", { token, method: "DELETE" }); setWebhookUrl(""); await refreshWebhook(); }
+    catch (e) { setWebhookErr(String(e)); }
   }
 
   return (
@@ -221,6 +248,37 @@ export default function SettingsPage() {
             )}
           </div>
           {scheduleErr && <p className="error">{scheduleErr}</p>}
+        </div>
+
+        <div className="section-title"><h2>Alerts</h2></div>
+        <p className="muted small">
+          Get notified when the tribunal confirms a violation. Paste a Slack incoming-webhook
+          URL for a formatted Slack message, or any other URL for a signed JSON POST
+          (verify it with the <code className="code">X-Teluvane-Signature</code> header, HMAC-SHA256
+          of the body using the secret below).
+        </p>
+
+        <div className="card" style={{ padding: 24 }}>
+          <div className="field">
+            <label className="label">Webhook URL</label>
+            <input className="input" placeholder="https://hooks.slack.com/services/... or your own endpoint"
+                   value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)} />
+          </div>
+          {webhook?.secret && (
+            <div className="field">
+              <label className="label">Signing secret</label>
+              <span className="code">{webhook.secret}</span>
+            </div>
+          )}
+          <div className="btn-row">
+            <button className="btn btn-primary" style={{ width: "auto" }} onClick={saveWebhook} disabled={!webhookUrl || webhookBusy}>
+              {webhookBusy ? "Saving…" : "Save"}
+            </button>
+            {webhook?.url && (
+              <button className="btn btn-ghost" onClick={clearWebhook}>Remove</button>
+            )}
+          </div>
+          {webhookErr && <p className="error">{webhookErr}</p>}
         </div>
       </main>
     </>

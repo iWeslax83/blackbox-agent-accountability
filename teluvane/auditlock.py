@@ -1,5 +1,6 @@
 # teluvane/teluvane/auditlock.py
 from .tribunal import audit   # imported at module scope so tests can monkeypatch it here
+from .webhooks import send_webhook
 
 def audited_run(store, org_id: str, session_id: str, pack, api_key: str | None):
     """Serialize per (org_id, session_id) with a Postgres advisory xact lock so two concurrent
@@ -18,5 +19,8 @@ def audited_run(store, org_id: str, session_id: str, pack, api_key: str | None):
         verdicts = audit(events, session_id, pack, anthropic_api_key=api_key)
         for v in verdicts:
             store.add_verdict(org_id, v)
-        conn.commit()        # release lock
+        conn.commit()        # release lock, before the webhook POST so it can't hold it open
+    # Only for freshly-computed verdicts, not the `existing` early-return above, so re-running
+    # an audit on an already-audited session doesn't re-notify every time.
+    send_webhook(org_id, session_id, verdicts)
     return verdicts
