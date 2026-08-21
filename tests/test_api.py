@@ -21,10 +21,12 @@ def client():
     from teluvane.ingest import app
     return TestClient(app)
 
-def _jwt(user_id):
+def _jwt(user_id, email=None):
     now = int(time.time())
-    return jwt.encode({"sub": user_id, "aud": "authenticated", "iat": now, "exp": now + 3600},
-                      "test-secret", algorithm="HS256")
+    payload = {"sub": user_id, "aud": "authenticated", "iat": now, "exp": now + 3600}
+    if email:
+        payload["email"] = email
+    return jwt.encode(payload, "test-secret", algorithm="HS256")
 
 def _event(session_id="s1"):
     return {"agent_id": "a", "session_id": session_id, "kind": "tool_call",

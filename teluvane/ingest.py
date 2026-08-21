@@ -11,9 +11,11 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from .schema import Event, Verdict
 from .store import Store
-from .auth import current_org, verify_jwt
+from .auth import current_org, verify_jwt, verify_jwt_claims
 from .apikeys import org_from_api_key, create_api_key, list_api_keys, revoke_api_key
-from .orgs import create_org, org_for_user
+from .orgs import (create_org, org_for_user, member_role, require_owner, list_members,
+                   set_member_role, remove_member, create_invite, list_invites, revoke_invite,
+                   find_pending_invite, accept_invite)
 from .policy import load_policy_pack, Rule
 from .custom_rules import list_custom_rules, upsert_custom_rule, delete_custom_rule, effective_pack
 from .byok import set_byok, get_byok, clear_byok, has_byok
@@ -213,11 +215,62 @@ def demo_seed(org_id: str = Depends(current_org)) -> dict:
 def make_org(name: str = Body(embed=True), authorization: str = Header(default=None)) -> dict:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="missing bearer token")
-    user_id = verify_jwt(authorization[len("Bearer "):])
+    token = authorization[len("Bearer "):]
+    user_id = verify_jwt(token)
     existing = org_for_user(user_id)
     if existing:
         return {"org_id": existing}
+    # A brand-new user whose email matches a pending team invite joins that org instead of
+    # getting their own — the common case for someone who was invited and is signing up for
+    # the first time. No email delivery needed: the owner just shares the invited address.
+    email = verify_jwt_claims(token).get("email")
+    invite = find_pending_invite(email) if email else None
+    if invite:
+        accept_invite(invite["id"], user_id)
+        return {"org_id": invite["org_id"]}
     return {"org_id": create_org(name, user_id)}
+
+# ---- team management (human auth: JWT) ------------------------------------------------------
+@app.get("/orgs/members")
+def get_members(org_id: str = Depends(current_org)) -> list[dict]:
+    return list_members(org_id)
+
+@app.put("/orgs/members/{user_id}")
+def put_member_role(user_id: str, role: str = Body(embed=True),
+                    org_id: str = Depends(current_org), authorization: str = Header(default=None)) -> dict:
+    require_owner(org_id, verify_jwt(authorization[len("Bearer "):]))
+    if role not in ("owner", "member"):
+        raise HTTPException(status_code=400, detail="role must be 'owner' or 'member'")
+    set_member_role(org_id, user_id, role)
+    return {"user_id": user_id, "role": role}
+
+@app.delete("/orgs/members/{user_id}")
+def delete_member(user_id: str, org_id: str = Depends(current_org),
+                  authorization: str = Header(default=None)) -> dict:
+    require_owner(org_id, verify_jwt(authorization[len("Bearer "):]))
+    remove_member(org_id, user_id)
+    return {"removed": user_id}
+
+@app.get("/orgs/invites")
+def get_invites(org_id: str = Depends(current_org)) -> list[dict]:
+    return list_invites(org_id)
+
+@app.post("/orgs/invites")
+def post_invite(email: str = Body(...), role: str = Body(default="member"),
+                org_id: str = Depends(current_org), authorization: str = Header(default=None)) -> dict:
+    user_id = verify_jwt(authorization[len("Bearer "):])
+    require_owner(org_id, user_id)
+    if role not in ("owner", "member"):
+        raise HTTPException(status_code=400, detail="role must be 'owner' or 'member'")
+    create_invite(org_id, email, role, user_id)
+    return {"email": email.lower(), "role": role}
+
+@app.delete("/orgs/invites/{invite_id}")
+def delete_invite(invite_id: int, org_id: str = Depends(current_org),
+                  authorization: str = Header(default=None)) -> dict:
+    require_owner(org_id, verify_jwt(authorization[len("Bearer "):]))
+    revoke_invite(org_id, invite_id)
+    return {"revoked": invite_id}
 
 @app.post("/keys")
 def new_key(name: str = Body(embed=True), org_id: str = Depends(current_org)) -> dict:

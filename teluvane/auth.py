@@ -29,7 +29,7 @@ def _get_jwks_client() -> PyJWKClient:
         _jwks_client = PyJWKClient(_jwks_url())
     return _jwks_client
 
-def verify_jwt(token: str) -> str:
+def _decode_payload(token: str) -> dict:
     try:
         alg = jwt.get_unverified_header(token).get("alg", "")
     except jwt.PyJWTError:
@@ -45,10 +45,17 @@ def verify_jwt(token: str) -> str:
         raise                      # propagate config errors (e.g. missing SUPABASE_URL) as-is
     except Exception:
         raise HTTPException(status_code=401, detail="invalid or expired token")
-    sub = payload.get("sub")
-    if not sub:
+    if not payload.get("sub"):
         raise HTTPException(status_code=401, detail="token has no subject")
-    return sub
+    return payload
+
+def verify_jwt(token: str) -> str:
+    return _decode_payload(token)["sub"]
+
+def verify_jwt_claims(token: str) -> dict:
+    """Like verify_jwt but returns the full payload (sub, email, ...) for callers that need
+    more than just the user id, e.g. matching a signup against a pending team invite by email."""
+    return _decode_payload(token)
 
 def current_org(authorization: str = Header(default=None)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
