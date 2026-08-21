@@ -1,0 +1,30 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import LandingBody from "./LandingBody";
+
+vi.mock("next/font/google", () => ({
+  Geist: () => ({ className: "" }),
+}));
+
+beforeEach(() => {
+  vi.stubGlobal("IntersectionObserver", class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  });
+  vi.stubGlobal("matchMedia", vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  })));
+});
+
+describe("LandingBody", () => {
+  it("renders the hero, pricing, and footer sections", () => {
+    render(<LandingBody />);
+    expect(screen.getAllByRole("link", { name: /get started free/i }).length).toBeGreaterThan(0);
+    expect(screen.getByText("$19.99")).toBeTruthy();
+    expect(screen.getByText(/not legal advice/i)).toBeTruthy();
+  });
+});

@@ -1,0 +1,19 @@
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import Footer from "./Footer";
+
+describe("Footer", () => {
+  it("links to GitHub, dashboard, privacy, terms, and accessibility", () => {
+    render(<Footer />);
+    expect(screen.getByRole("link", { name: /github/i }).getAttribute("href")).toBe("https://github.com/iWeslax83/teluvane");
+    expect(screen.getByRole("link", { name: /dashboard/i }).getAttribute("href")).toBe("/login");
+    expect(screen.getByRole("link", { name: /privacy/i }).getAttribute("href")).toBe("/privacy");
+    expect(screen.getByRole("link", { name: /terms/i }).getAttribute("href")).toBe("/terms");
+    expect(screen.getByRole("link", { name: /accessibility/i }).getAttribute("href")).toBe("/accessibility");
+  });
+
+  it("does not claim to be legal advice", () => {
+    render(<Footer />);
+    expect(screen.getByText(/not legal advice/i)).toBeTruthy();
+  });
+});
