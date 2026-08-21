@@ -22,6 +22,6 @@ export async function ensureOrg(token: string, name = "My workspace"): Promise<v
   try {
     await apiFetch("/orgs", { token, method: "POST", body: { name } });
   } catch {
-    // Non-fatal — never block sign-in on bootstrap; pages surface their own errors.
+    // Non-fatal: never block sign-in on bootstrap, pages surface their own errors.
   }
 }

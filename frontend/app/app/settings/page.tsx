@@ -62,7 +62,7 @@ export default function SettingsPage() {
           {err && <p className="error">{err}</p>}
         </div>
 
-        <p className="notice">🔒 Your key is encrypted at rest and decrypted only in-memory while running your audits. It is never logged.</p>
+        <p className="notice">Your key is encrypted at rest and decrypted only in-memory while running your audits. It is never logged.</p>
       </main>
     </>
   );
