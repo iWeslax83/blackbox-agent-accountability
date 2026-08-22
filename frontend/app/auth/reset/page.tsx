@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
+import BrandMark from "@/components/BrandMark";
 
 export default function ResetPassword() {
   const sb = getSupabase();
@@ -43,7 +44,7 @@ export default function ResetPassword() {
     return (
       <main id="main-content" tabIndex={-1} className="center-screen">
         <div className="card auth-card">
-          <div className="brand" style={{ marginBottom: 16 }}><span className="mark">T</span> TELUVANE</div>
+          <div className="brand" style={{ marginBottom: 16 }}><span className="mark"><BrandMark /></span> TELUVANE</div>
           <h1 style={{ marginBottom: 8 }}>Password updated</h1>
           <p className="muted small" style={{ marginBottom: 20 }}>You can log in with your new password now.</p>
           <button className="btn btn-primary" onClick={() => router.push("/app")}>Go to workspace</button>
@@ -55,7 +56,7 @@ export default function ResetPassword() {
   return (
     <main id="main-content" tabIndex={-1} className="center-screen">
       <div className="card auth-card">
-        <div className="brand" style={{ marginBottom: 16 }}><span className="mark">T</span> TELUVANE</div>
+        <div className="brand" style={{ marginBottom: 16 }}><span className="mark"><BrandMark /></span> TELUVANE</div>
         <h1 style={{ marginBottom: 4 }}>Choose a new password</h1>
         <p className="muted small" style={{ marginBottom: 24 }}>
           {ready ? "Set a new password for your account." : "Confirming your reset link…"}

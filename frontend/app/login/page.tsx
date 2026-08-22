@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
+import BrandMark from "@/components/BrandMark";
 
 export default function LoginPage() {
   const sb = getSupabase();
@@ -53,7 +54,7 @@ export default function LoginPage() {
     return (
       <main id="main-content" tabIndex={-1} className="center-screen">
         <div className="card auth-card">
-          <div className="brand" style={{ marginBottom: 16 }}><span className="mark">T</span> TELUVANE</div>
+          <div className="brand" style={{ marginBottom: 16 }}><span className="mark"><BrandMark /></span> TELUVANE</div>
           <h1 style={{ marginBottom: 8 }}>Check your inbox</h1>
           <p className="muted small" style={{ marginBottom: 20 }}>
             {mode === "reset" ? (
@@ -75,7 +76,7 @@ export default function LoginPage() {
     <main id="main-content" tabIndex={-1} className="center-screen">
       <div className="card auth-card">
         <div className="brand" style={{ marginBottom: 16 }}>
-          <span className="mark">T</span> TELUVANE
+          <span className="mark"><BrandMark /></span> TELUVANE
         </div>
         <p className="eyebrow" style={{ marginBottom: 18 }}>AI agent accountability</p>
         <h1 style={{ marginBottom: 4 }}>

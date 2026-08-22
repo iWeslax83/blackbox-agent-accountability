@@ -16,13 +16,12 @@ export default function Icon() {
           justifyContent: "center",
           background: "#1a1714",
           borderRadius: 7,
-          color: "#f4efe6",
-          fontSize: 20,
-          fontWeight: 800,
-          fontFamily: "system-ui, sans-serif",
         }}
       >
-        T
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9.5" stroke="#b4451f" strokeWidth="1.8" />
+          <path d="M7.5 12L10.2 14.6L16 8.4" stroke="#f4efe6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </div>
     ),
     { ...size }

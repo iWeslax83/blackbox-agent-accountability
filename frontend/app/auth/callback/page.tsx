@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
+import BrandMark from "@/components/BrandMark";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function AuthCallback() {
     <main id="main-content" tabIndex={-1} className="center-screen">
       <div className="card auth-card" style={{ textAlign: "center" }}>
         <div className="brand" style={{ justifyContent: "center", marginBottom: 14 }}>
-          <span className="mark">T</span> TELUVANE
+          <span className="mark"><BrandMark /></span> TELUVANE
         </div>
         <p className="muted">{msg}</p>
         <p className="muted small" style={{ marginTop: 14 }}><a href="/login">Go to log in</a></p>

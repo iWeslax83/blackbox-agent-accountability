@@ -1,6 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
+import BrandMark from "./BrandMark";
 
 const LINKS = [
   { href: "/app", label: "Sessions" },
@@ -22,7 +23,7 @@ export default function TopNav() {
   return (
     <header className="topnav">
       <div className="inner">
-        <a href="/app" className="brand"><span className="mark">T</span> TELUVANE</a>
+        <a href="/app" className="brand"><span className="mark"><BrandMark /></span> TELUVANE</a>
         <nav className="navlinks">
           {LINKS.map(({ href, label }) => {
             // /app itself must match exactly, or every page (which also starts with /app) would light up.
