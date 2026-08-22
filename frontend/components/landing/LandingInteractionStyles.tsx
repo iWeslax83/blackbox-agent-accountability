@@ -1,5 +1,5 @@
-// frontend/components/landing/dark/LandingInteractionStyles.tsx
-import { ACCENT_TEXT } from "@/lib/landingTheme";
+// frontend/components/landing/LandingInteractionStyles.tsx
+import { ACCENT } from "@/lib/landingTheme";
 
 export default function LandingInteractionStyles() {
   return (
@@ -11,11 +11,11 @@ export default function LandingInteractionStyles() {
         transform: scale(0.97);
       }
       .landing-btn:focus-visible {
-        outline: 2px solid ${ACCENT_TEXT};
+        outline: 2px solid ${ACCENT};
         outline-offset: 3px;
       }
       .landing-link:focus-visible {
-        outline: 2px solid ${ACCENT_TEXT};
+        outline: 2px solid ${ACCENT};
         outline-offset: 2px;
         border-radius: 2px;
       }

@@ -1,19 +1,16 @@
 // frontend/app/terms/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { sectionStyle, headingStyle, bodyStyle } from "@/lib/legalPageStyles";
 
 export const metadata: Metadata = {
   title: "Terms of Service: TELUVANE",
   description: "The terms governing your use of TELUVANE.",
 };
 
-const sectionStyle: React.CSSProperties = { marginBottom: "2rem" };
-const headingStyle: React.CSSProperties = { fontSize: "1.15rem", fontWeight: 700, marginBottom: ".6rem" };
-const bodyStyle: React.CSSProperties = { color: "#4a4540", lineHeight: 1.65 };
-
 export default function TermsPage() {
   return (
-    <main style={{ background: "#f4efe6", color: "#1a1714", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh" }}>
+    <main id="main-content" tabIndex={-1} style={{ background: "#f4efe6", color: "#1a1714", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh" }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "4rem 2rem 6rem" }}>
         <Link href="/" style={{ color: "#b4451f", fontSize: ".9rem", fontWeight: 600, textDecoration: "none" }}>&larr; Back to homepage</Link>
         <h1 style={{ fontSize: "2.2rem", fontWeight: 800, letterSpacing: "-.02em", margin: "1.5rem 0 .5rem" }}>Terms of Service</h1>

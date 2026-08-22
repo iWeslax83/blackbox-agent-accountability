@@ -8,6 +8,7 @@ const getUser = vi.fn().mockResolvedValue({ data: { user: { id: "user-owner" } }
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
+  usePathname: () => "/app/team",
 }));
 
 vi.mock("@/lib/useSession", () => ({

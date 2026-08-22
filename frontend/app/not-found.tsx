@@ -7,6 +7,8 @@ export const metadata: Metadata = { title: "Page not found: TELUVANE" };
 export default function NotFound() {
   return (
     <main
+      id="main-content"
+      tabIndex={-1}
       style={{
         minHeight: "100dvh",
         display: "flex",

@@ -31,7 +31,7 @@ export default function AuthCallback() {
   }, [router]);
 
   return (
-    <main className="center-screen">
+    <main id="main-content" tabIndex={-1} className="center-screen">
       <div className="card auth-card" style={{ textAlign: "center" }}>
         <div className="brand" style={{ justifyContent: "center", marginBottom: 14 }}>
           <span className="mark">T</span> TELUVANE

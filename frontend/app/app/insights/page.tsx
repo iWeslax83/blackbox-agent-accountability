@@ -88,7 +88,7 @@ export default function InsightsPage() {
   return (
     <>
       <TopNav />
-      <main className="page">
+      <main id="main-content" tabIndex={-1} className="page">
         <p className="eyebrow">Workspace</p>
         <h1 style={{ marginBottom: 6 }}>Insights</h1>
         <p className="muted small">Confirmed tribunal violations across all your sessions, over time.</p>

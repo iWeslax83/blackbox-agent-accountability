@@ -82,17 +82,41 @@ h2 { font-size: 1.05rem; letter-spacing: 0.01em; }
 .btn-primary:hover { background: var(--rust-dark); }
 .btn-ghost { background: transparent; color: var(--ink); border-color: var(--border); }
 .btn-ghost:hover { background: #efe9dd; }
-.btn-sm { padding: 6px 11px; font-size: 0.8rem; border-radius: 7px; }
+/* Visually small, but the tap target still meets the 44px minimum: the pseudo-element
+   extends the hit area without growing the button on screen. */
+.btn-sm { position: relative; padding: 6px 11px; font-size: 0.8rem; border-radius: 7px; }
+.btn-sm::after {
+  content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: max(100%, 44px); height: max(100%, 44px);
+}
 .btn-link { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: inherit; padding: 0; }
 .btn-link:hover { text-decoration: underline; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* top nav */
 .topnav { border-bottom: 1px solid var(--border); background: #fbf8f1; position: sticky; top: 0; z-index: 10; }
-.topnav .inner { max-width: 880px; margin: 0 auto; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; }
+.topnav .inner { max-width: 880px; margin: 0 auto; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .navlinks { display: flex; align-items: center; gap: 20px; font-size: 0.9rem; }
-.navlinks a { color: var(--ink); }
+.navlinks a { color: var(--ink); white-space: nowrap; }
 .navlinks a:hover { color: var(--rust); text-decoration: none; }
+.navlinks a[aria-current="page"] { color: var(--rust); font-weight: 600; }
+
+/* Below ~700px the seven links + logout button no longer fit in one row without
+   wrapping the header or forcing the page to scroll sideways. Scope the scroll to
+   the nav itself so every link stays reachable and the page body never scrolls. */
+@media (max-width: 700px) {
+  .topnav .inner { padding: 0 16px; gap: 12px; }
+  .brand { flex: none; }
+  .navlinks {
+    gap: 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+  }
+  .navlinks .btn { flex: none; }
+}
 
 /* lists / rows */
 .list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
@@ -129,6 +153,19 @@ h2 { font-size: 1.05rem; letter-spacing: 0.01em; }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* keyboard-only skip link: hidden until it receives focus, then jumps above everything */
+.skip-link {
+  position: absolute; top: -40px; left: 8px; z-index: 1000;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 16px; border-radius: 6px;
+  font-size: 0.85rem; font-weight: 600;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 8px;
+  outline: 2px solid var(--rust); outline-offset: 2px;
 }
 
 /* usage meter */

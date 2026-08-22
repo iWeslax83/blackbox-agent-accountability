@@ -7,10 +7,9 @@ import PricingZigzag from "./PricingZigzag";
 import Cta from "./Cta";
 import Footer from "./Footer";
 import StickyMobileCta from "./StickyMobileCta";
-import LandingInteractionStyles from "./dark/LandingInteractionStyles";
+import LandingInteractionStyles from "./LandingInteractionStyles";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-import { DARK_BG, TEXT_ON_DARK, ACCENT_FILL, ACCENT_ON_FILL, ACCENT_TEXT, MUTED_ON_DARK, BORDER_ON_DARK } from "@/lib/landingTheme";
-import { landingFont } from "@/lib/landingFont";
+import { BG, INK, ACCENT, ACCENT_ON_FILL, MUTED, BORDER } from "@/lib/landingTheme";
 
 const MONO_STACK = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
@@ -63,7 +62,7 @@ const steps = [
 
 export default function LandingBody() {
   return (
-    <main className={landingFont.className} style={{ background: DARK_BG, color: TEXT_ON_DARK, lineHeight: 1.6 }}>
+    <main id="main-content" tabIndex={-1} style={{ background: BG, color: INK, lineHeight: 1.6 }}>
       <LandingInteractionStyles />
       <noscript>
         <style>{".fade-section{opacity:1 !important;}"}</style>
@@ -75,37 +74,37 @@ export default function LandingBody() {
           display: "flex", flexWrap: "wrap-reverse", gap: "3rem", alignItems: "center",
         }}>
           <div style={{ flex: "1 1 420px", minWidth: 0 }}>
-            <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: "1rem" }}>
+            <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT, marginBottom: "1rem" }}>
               AI agent accountability
             </div>
             <h1 style={{ fontSize: "clamp(2.3rem, 5.2vw, 3.4rem)", fontWeight: 900, letterSpacing: "-.045em", lineHeight: 1.06, marginBottom: "1.2rem" }}>
-              Every AI agent action, <span style={{ color: ACCENT_TEXT }}>logged and hash-chained</span>.
+              Every AI agent action, <span style={{ color: ACCENT }}>logged and hash-chained</span>.
             </h1>
-            <p style={{ fontSize: "1.1rem", color: MUTED_ON_DARK, lineHeight: 1.55, marginBottom: "2rem", maxWidth: 520 }}>
+            <p style={{ fontSize: "1.1rem", color: MUTED, lineHeight: 1.55, marginBottom: "2rem", maxWidth: 520 }}>
               Tamper one row and the chain breaks visibly. An autonomous tribunal audits the log and exports a regulator-ready evidence pack.
             </p>
             <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
               <a href="/login" className="landing-btn" style={{
                 display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
                 borderRadius: 8, fontSize: ".95rem", fontWeight: 700,
-                background: ACCENT_FILL, color: ACCENT_ON_FILL, textDecoration: "none",
+                background: ACCENT, color: ACCENT_ON_FILL, textDecoration: "none",
               }}>
                 Get started free
               </a>
               <a href="https://github.com/iWeslax83/teluvane" target="_blank" rel="noopener" className="landing-btn landing-link" style={{
                 display: "inline-flex", alignItems: "center", padding: ".75rem 1.6rem",
                 borderRadius: 8, fontSize: ".95rem", fontWeight: 600,
-                background: "transparent", color: TEXT_ON_DARK, border: `1.5px solid ${BORDER_ON_DARK}`, textDecoration: "none",
+                background: "transparent", color: INK, border: `1.5px solid ${BORDER}`, textDecoration: "none",
               }}>
                 View on GitHub
               </a>
             </div>
-            <div style={{ fontSize: ".82rem", color: MUTED_ON_DARK, display: "flex", alignItems: "center", gap: ".5rem" }}>
+            <div style={{ fontSize: ".82rem", color: MUTED, display: "flex", alignItems: "center", gap: ".5rem" }}>
               <span>Built with</span>
               <span>LangGraph</span>
-              <span style={{ width: 3, height: 3, borderRadius: "50%", background: BORDER_ON_DARK, display: "inline-block" }}></span>
+              <span style={{ width: 3, height: 3, borderRadius: "50%", background: BORDER, display: "inline-block" }}></span>
               <span>Claude</span>
-              <span style={{ width: 3, height: 3, borderRadius: "50%", background: BORDER_ON_DARK, display: "inline-block" }}></span>
+              <span style={{ width: 3, height: 3, borderRadius: "50%", background: BORDER, display: "inline-block" }}></span>
               <span>FastAPI</span>
             </div>
           </div>
@@ -115,9 +114,9 @@ export default function LandingBody() {
         </div>
       </FadeInSection>
 
-      <FadeInSection id="problem" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER_ON_DARK}` }}>
+      <FadeInSection id="problem" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-          <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: ".6rem" }}>The problem</div>
+          <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT, marginBottom: ".6rem" }}>The problem</div>
           <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 800, letterSpacing: "-.025em", lineHeight: 1.15, marginBottom: "2.5rem", maxWidth: 640 }}>
             The EU AI Act asks for proof, not just logs.
           </h2>
@@ -126,20 +125,20 @@ export default function LandingBody() {
               <div key={num} style={{
                 flex: "1 1 220px",
                 padding: "0 1.6rem",
-                borderLeft: i === 0 ? "none" : `1px solid ${BORDER_ON_DARK}`,
+                borderLeft: i === 0 ? "none" : `1px solid ${BORDER}`,
                 marginBottom: "1.5rem",
               }}>
-                <div style={{ fontSize: "2.1rem", fontWeight: 900, letterSpacing: "-.02em", color: ACCENT_TEXT, fontFamily: MONO_STACK }}>{num}</div>
-                <p style={{ fontSize: ".85rem", color: MUTED_ON_DARK, marginTop: ".4rem" }}>{text}</p>
+                <div style={{ fontSize: "2.1rem", fontWeight: 900, letterSpacing: "-.02em", color: ACCENT, fontFamily: MONO_STACK }}>{num}</div>
+                <p style={{ fontSize: ".85rem", color: MUTED, marginTop: ".4rem" }}>{text}</p>
               </div>
             ))}
           </div>
         </div>
       </FadeInSection>
 
-      <FadeInSection id="how" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER_ON_DARK}` }}>
+      <FadeInSection id="how" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: ".6rem" }}>How it works</div>
+          <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT, marginBottom: ".6rem" }}>How it works</div>
           <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 800, letterSpacing: "-.025em", marginBottom: "2.8rem", maxWidth: 640 }}>
             Three steps from first action to court-ready evidence.
           </h2>
@@ -149,19 +148,19 @@ export default function LandingBody() {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
                   <div style={{
                     width: 34, height: 34, borderRadius: "50%",
-                    border: `1.5px solid ${ACCENT_TEXT}`, color: ACCENT_TEXT,
+                    border: `1.5px solid ${ACCENT}`, color: ACCENT,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontFamily: MONO_STACK, fontSize: ".8rem", fontWeight: 700,
                   }}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
                   {i !== steps.length - 1 && (
-                    <div style={{ width: 1, flex: 1, background: BORDER_ON_DARK, margin: ".4rem 0" }} />
+                    <div style={{ width: 1, flex: 1, background: BORDER, margin: ".4rem 0" }} />
                   )}
                 </div>
                 <div style={{ paddingBottom: i === steps.length - 1 ? 0 : "2.2rem" }}>
                   <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: ".4rem" }}>{title}</h3>
-                  <p style={{ fontSize: ".9rem", color: MUTED_ON_DARK, maxWidth: 520 }}>{desc}</p>
+                  <p style={{ fontSize: ".9rem", color: MUTED, maxWidth: 520 }}>{desc}</p>
                 </div>
               </div>
             ))}
@@ -169,22 +168,22 @@ export default function LandingBody() {
         </div>
       </FadeInSection>
 
-      <FadeInSection id="proof" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER_ON_DARK}` }}>
+      <FadeInSection id="proof" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: ".6rem" }}>Proof</div>
+          <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT, marginBottom: ".6rem" }}>Proof</div>
           <h2 style={{ fontSize: "clamp(1.6rem, 3.6vw, 2.1rem)", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "1.2rem", maxWidth: 560 }}>
             Every read re-verifies the whole chain, not just the last row.
           </h2>
-          <p style={{ fontSize: ".98rem", color: MUTED_ON_DARK, maxWidth: 560, marginBottom: "1.4rem" }}>
+          <p style={{ fontSize: ".98rem", color: MUTED, maxWidth: 560, marginBottom: "1.4rem" }}>
             Each event stores the hash of the one before it. Change a single byte in event #14 and every event after it, up to #4471, fails verification the next time anyone opens the log.
           </p>
-          <div style={{ fontFamily: MONO_STACK, fontSize: ".85rem", color: TEXT_ON_DARK, border: `1px solid ${BORDER_ON_DARK}`, borderLeft: `3px solid ${ACCENT_TEXT}`, padding: ".8rem 1rem", background: "transparent" }}>
-            verify(chain) &rarr; 4471/4471 events valid &middot; <span style={{ color: ACCENT_TEXT, fontWeight: 700 }}>INTACT</span>
+          <div style={{ fontFamily: MONO_STACK, fontSize: ".85rem", color: INK, border: `1px solid ${BORDER}`, borderLeft: `3px solid ${ACCENT}`, padding: ".8rem 1rem", background: "transparent" }}>
+            verify(chain) &rarr; 4471/4471 events valid &middot; <span style={{ color: ACCENT, fontWeight: 700 }}>INTACT</span>
           </div>
         </div>
       </FadeInSection>
 
-      <FadeInSection id="pricing" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER_ON_DARK}` }}>
+      <FadeInSection id="pricing" style={{ padding: "4.5rem 1.5rem", borderTop: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
           <PricingZigzag />
         </div>

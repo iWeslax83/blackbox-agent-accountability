@@ -51,7 +51,7 @@ export default function LoginPage() {
 
   if (sent) {
     return (
-      <main className="center-screen">
+      <main id="main-content" tabIndex={-1} className="center-screen">
         <div className="card auth-card">
           <div className="brand" style={{ marginBottom: 16 }}><span className="mark">T</span> TELUVANE</div>
           <h1 style={{ marginBottom: 8 }}>Check your inbox</h1>
@@ -72,7 +72,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="center-screen">
+    <main id="main-content" tabIndex={-1} className="center-screen">
       <div className="card auth-card">
         <div className="brand" style={{ marginBottom: 16 }}>
           <span className="mark">T</span> TELUVANE

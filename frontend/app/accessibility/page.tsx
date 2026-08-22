@@ -2,10 +2,7 @@
 import Link from "next/link";
 import { meetsWcagAA, contrastRatio } from "@/lib/contrast";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-
-const sectionStyle: React.CSSProperties = { marginBottom: "2rem" };
-const headingStyle: React.CSSProperties = { fontSize: "1.15rem", fontWeight: 700, marginBottom: ".6rem" };
-const bodyStyle: React.CSSProperties = { color: "#4a4540", lineHeight: 1.65 };
+import { sectionStyle, headingStyle, bodyStyle } from "@/lib/legalPageStyles";
 
 const BG = "#f4efe6";
 const TEXT = "#1a1714";
@@ -19,7 +16,7 @@ export default function AccessibilityPage() {
   const reducedMotion = useReducedMotion();
 
   return (
-    <main style={{ background: BG, color: TEXT, fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh" }}>
+    <main id="main-content" tabIndex={-1} style={{ background: BG, color: TEXT, fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh" }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "4rem 2rem 6rem" }}>
         <Link href="/" style={{ color: ACCENT, fontSize: ".9rem", fontWeight: 600, textDecoration: "none" }}>&larr; Back to homepage</Link>
         <h1 style={{ fontSize: "2.2rem", fontWeight: 800, letterSpacing: "-.02em", margin: "1.5rem 0 .5rem" }}>Accessibility</h1>

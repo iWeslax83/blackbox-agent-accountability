@@ -6,6 +6,7 @@ const apiFetch = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/app/settings",
 }));
 
 vi.mock("@/lib/supabase", () => ({

@@ -1,4 +1,4 @@
-import { DARK_BG, DARK_SURFACE, BORDER_ON_DARK, ACCENT_FILL, ACCENT_ON_FILL, ACCENT_TEXT, TEXT_ON_DARK, MUTED_ON_DARK } from "@/lib/landingTheme";
+import { BG, SURFACE, BORDER, ACCENT, ACCENT_ON_FILL, INK, MUTED } from "@/lib/landingTheme";
 
 function Tier({
   eyebrow, price, priceSuffix, description, features, ctaLabel, ctaHref, emphasized,
@@ -10,8 +10,8 @@ function Tier({
     <div style={{
       flex: "1 1 280px",
       minWidth: 0,
-      background: emphasized ? DARK_BG : DARK_SURFACE,
-      border: `1.5px solid ${emphasized ? ACCENT_FILL : BORDER_ON_DARK}`,
+      background: emphasized ? BG : SURFACE,
+      border: `1.5px solid ${emphasized ? ACCENT : BORDER}`,
       borderRadius: 12,
       padding: "2rem 1.7rem",
       position: "relative",
@@ -20,34 +20,34 @@ function Tier({
       {emphasized && (
         <div style={{
           position: "absolute", top: 0, left: "1.7rem", transform: "translateY(-50%)",
-          background: ACCENT_FILL, color: ACCENT_ON_FILL,
+          background: ACCENT, color: ACCENT_ON_FILL,
           fontSize: ".7rem", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase",
           padding: ".2rem .6rem", borderRadius: 3,
         }}>
           Most teams pick this
         </div>
       )}
-      <div style={{ fontSize: ".78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".07em", color: emphasized ? ACCENT_TEXT : MUTED_ON_DARK, marginBottom: ".5rem", marginTop: emphasized ? ".3rem" : 0 }}>
+      <div style={{ fontSize: ".78rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".07em", color: emphasized ? ACCENT : MUTED, marginBottom: ".5rem", marginTop: emphasized ? ".3rem" : 0 }}>
         {eyebrow}
       </div>
-      <div style={{ fontSize: "2.4rem", fontWeight: 900, letterSpacing: "-.03em", color: TEXT_ON_DARK }}>
+      <div style={{ fontSize: "2.4rem", fontWeight: 900, letterSpacing: "-.03em", color: INK }}>
         {price}
-        {priceSuffix && <sub style={{ fontSize: "1rem", fontWeight: 500, color: MUTED_ON_DARK }}>{priceSuffix}</sub>}
+        {priceSuffix && <sub style={{ fontSize: "1rem", fontWeight: 500, color: MUTED }}>{priceSuffix}</sub>}
       </div>
-      <p style={{ fontSize: ".9rem", color: MUTED_ON_DARK, margin: ".6rem 0 1.4rem" }}>{description}</p>
+      <p style={{ fontSize: ".9rem", color: MUTED, margin: ".6rem 0 1.4rem" }}>{description}</p>
       <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.6rem" }}>
         {features.map((f) => (
-          <li key={f} style={{ fontSize: ".875rem", padding: ".35rem 0", borderBottom: `1px solid ${BORDER_ON_DARK}`, display: "flex", gap: ".5rem", color: TEXT_ON_DARK }}>
-            <span style={{ color: ACCENT_TEXT, fontWeight: 700 }}>&#10003;</span>{f}
+          <li key={f} style={{ fontSize: ".875rem", padding: ".35rem 0", borderBottom: `1px solid ${BORDER}`, display: "flex", gap: ".5rem", color: INK }}>
+            <span style={{ color: ACCENT, fontWeight: 700 }}>&#10003;</span>{f}
           </li>
         ))}
       </ul>
       <a href={ctaHref} target={ctaHref.startsWith("http") ? "_blank" : undefined} rel={ctaHref.startsWith("http") ? "noopener" : undefined} className="landing-btn" style={{
         display: "block", textAlign: "center", padding: ".75rem 1rem", borderRadius: 7,
         fontSize: ".9rem", fontWeight: 700, textDecoration: "none",
-        background: emphasized ? ACCENT_FILL : "transparent",
-        color: emphasized ? ACCENT_ON_FILL : TEXT_ON_DARK,
-        border: emphasized ? "none" : `1.5px solid ${BORDER_ON_DARK}`,
+        background: emphasized ? ACCENT : "transparent",
+        color: emphasized ? ACCENT_ON_FILL : INK,
+        border: emphasized ? "none" : `1.5px solid ${BORDER}`,
       }}>
         {ctaLabel}
       </a>
@@ -55,10 +55,10 @@ function Tier({
   );
 }
 
-export default function PricingZigzag({ headingColor = TEXT_ON_DARK }: { headingColor?: string }) {
+export default function PricingZigzag({ headingColor = INK }: { headingColor?: string }) {
   return (
     <div>
-      <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT_TEXT, marginBottom: ".6rem" }}>
+      <div style={{ fontSize: ".78rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: ACCENT, marginBottom: ".6rem" }}>
         Pricing
       </div>
       <h2 style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: "-.02em", marginBottom: "2.5rem", color: headingColor }}>

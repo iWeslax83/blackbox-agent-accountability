@@ -1,13 +1,10 @@
-export const DARK_BG = "#0a0908";
-export const DARK_SURFACE = "#151310";
-export const TEXT_ON_DARK = "#f5f1e8";
-export const ACCENT_TEXT = "#e0a13e";
-export const ACCENT_FILL = "#e0a13e";
-export const ACCENT_ON_FILL = DARK_BG;
-export const MUTED_ON_DARK = "#9c9284";
-export const BORDER_ON_DARK = "#2b2822";
-
-export const BG_LIGHT = TEXT_ON_DARK;
-export const TEXT_ON_LIGHT = DARK_BG;
-export const MUTED_ON_LIGHT = "#6b6055";
-export const BORDER_ON_LIGHT = "#ddd4c7";
+// Shared with app/globals.css :root — landing page uses the same brand tokens as the
+// dashboard, auth flows, and legal pages so the identity doesn't reset at the login wall.
+export const BG = "#f4efe6";
+export const SURFACE = "#fbf8f1";
+export const INK = "#1a1714";
+export const ACCENT = "#b4451f";
+export const ACCENT_DARK = "#9d3b18";
+export const ACCENT_ON_FILL = "#ffffff";
+export const MUTED = "#8a8275";
+export const BORDER = "#e3dccd";

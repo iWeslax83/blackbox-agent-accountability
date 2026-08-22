@@ -48,7 +48,7 @@ export default function KeysPage() {
   return (
     <>
       <TopNav />
-      <main className="page">
+      <main id="main-content" tabIndex={-1} className="page">
         <p className="eyebrow">Workspace</p>
         <h1 style={{ marginBottom: 6 }}>API keys</h1>
         <p className="muted small">Use a key as a bearer token so your agents can record events to TELUVANE.</p>

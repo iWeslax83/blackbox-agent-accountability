@@ -1,4 +1,4 @@
-import { DARK_BG, ACCENT_FILL, ACCENT_ON_FILL, BORDER_ON_DARK } from "@/lib/landingTheme";
+import { BG, ACCENT, ACCENT_ON_FILL, BORDER } from "@/lib/landingTheme";
 
 export default function StickyMobileCta() {
   return (
@@ -10,8 +10,8 @@ export default function StickyMobileCta() {
         left: 0,
         right: 0,
         zIndex: 40,
-        background: DARK_BG,
-        borderTop: `1px solid ${BORDER_ON_DARK}`,
+        background: BG,
+        borderTop: `1px solid ${BORDER}`,
         padding: "0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))",
         display: "none",
       }}
@@ -27,7 +27,7 @@ export default function StickyMobileCta() {
           borderRadius: 8,
           fontSize: ".95rem",
           fontWeight: 700,
-          background: ACCENT_FILL,
+          background: ACCENT,
           color: ACCENT_ON_FILL,
           textDecoration: "none",
         }}

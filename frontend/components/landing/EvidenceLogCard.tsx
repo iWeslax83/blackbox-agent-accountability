@@ -1,4 +1,4 @@
-import { DARK_BG, DARK_SURFACE, BORDER_ON_DARK, ACCENT_TEXT, TEXT_ON_DARK, MUTED_ON_DARK } from "@/lib/landingTheme";
+import { BG, SURFACE, BORDER, ACCENT, INK, MUTED } from "@/lib/landingTheme";
 
 const MONO_STACK = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
@@ -12,8 +12,8 @@ export default function EvidenceLogCard({ size = "md" }: { size?: "md" | "lg" })
   const scale = size === "lg" ? 1.15 : 1;
   return (
     <div style={{
-      background: DARK_SURFACE,
-      border: `1px solid ${BORDER_ON_DARK}`,
+      background: SURFACE,
+      border: `1px solid ${BORDER}`,
       borderRadius: 10,
       overflow: "hidden",
       fontFamily: MONO_STACK,
@@ -23,27 +23,27 @@ export default function EvidenceLogCard({ size = "md" }: { size?: "md" | "lg" })
       <div style={{
         display: "flex", alignItems: "center", gap: ".4rem",
         padding: `${0.6 * scale}rem ${0.9 * scale}rem`,
-        borderBottom: `1px solid ${BORDER_ON_DARK}`,
-        background: DARK_BG,
+        borderBottom: `1px solid ${BORDER}`,
+        background: BG,
       }}>
-        <span style={{ width: 7, height: 7, borderRadius: "50%", border: `1px solid ${BORDER_ON_DARK}` }} />
-        <span style={{ width: 7, height: 7, borderRadius: "50%", border: `1px solid ${BORDER_ON_DARK}` }} />
-        <span style={{ width: 7, height: 7, borderRadius: "50%", border: `1px solid ${BORDER_ON_DARK}` }} />
-        <span style={{ fontSize: `${0.72 * scale}rem`, color: MUTED_ON_DARK, marginLeft: ".4rem" }}>agent_log.chain</span>
+        <span style={{ width: 7, height: 7, borderRadius: "50%", border: `1px solid ${BORDER}` }} />
+        <span style={{ width: 7, height: 7, borderRadius: "50%", border: `1px solid ${BORDER}` }} />
+        <span style={{ width: 7, height: 7, borderRadius: "50%", border: `1px solid ${BORDER}` }} />
+        <span style={{ fontSize: `${0.72 * scale}rem`, color: MUTED, marginLeft: ".4rem" }}>agent_log.chain</span>
       </div>
       <div style={{ padding: `${0.9 * scale}rem ${1.1 * scale}rem`, fontSize: `${0.8 * scale}rem`, lineHeight: 1.65 }}>
         {events.map((e, i) => (
-          <div key={e.id} style={{ marginBottom: i === events.length - 1 ? 0 : `${0.85 * scale}rem`, paddingBottom: i === events.length - 1 ? 0 : `${0.85 * scale}rem`, borderBottom: i === events.length - 1 ? "none" : `1px solid ${BORDER_ON_DARK}` }}>
-            <div style={{ color: MUTED_ON_DARK, marginBottom: ".25rem" }}>event #{e.id} &middot; {e.type}</div>
-            <div style={{ color: TEXT_ON_DARK }}>
-              action: <span style={{ color: ACCENT_TEXT }}>{e.action}</span>
+          <div key={e.id} style={{ marginBottom: i === events.length - 1 ? 0 : `${0.85 * scale}rem`, paddingBottom: i === events.length - 1 ? 0 : `${0.85 * scale}rem`, borderBottom: i === events.length - 1 ? "none" : `1px solid ${BORDER}` }}>
+            <div style={{ color: MUTED, marginBottom: ".25rem" }}>event #{e.id} &middot; {e.type}</div>
+            <div style={{ color: INK }}>
+              action: <span style={{ color: ACCENT }}>{e.action}</span>
             </div>
-            <div style={{ color: TEXT_ON_DARK }}>
-              hash: <span style={{ color: MUTED_ON_DARK }}>{e.hash}</span>
+            <div style={{ color: INK }}>
+              hash: <span style={{ color: MUTED }}>{e.hash}</span>
             </div>
             {i === events.length - 1 && (
-              <div style={{ color: TEXT_ON_DARK, marginTop: ".25rem" }}>
-                chain: <span style={{ color: ACCENT_TEXT, fontWeight: 700 }}>INTACT</span>
+              <div style={{ color: INK, marginTop: ".25rem" }}>
+                chain: <span style={{ color: ACCENT, fontWeight: 700 }}>INTACT</span>
               </div>
             )}
           </div>

@@ -10,6 +10,7 @@ const getUser = vi.fn().mockResolvedValue({ data: { user: { email: "me@example.c
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
   useSearchParams: () => new URLSearchParams(""),
+  usePathname: () => "/app/billing",
 }));
 
 vi.mock("@/lib/useSession", () => ({

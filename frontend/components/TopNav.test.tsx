@@ -7,6 +7,7 @@ const signOut = vi.fn().mockResolvedValue({});
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
+  usePathname: () => "/app",
 }));
 
 vi.mock("@/lib/supabase", () => ({
