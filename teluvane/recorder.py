@@ -27,8 +27,10 @@ class TeluvaneRecorder:
         else:
             raise RuntimeError("Recorder needs either store or base_url")
 
-    def record_llm_call(self, intent: str, output: str = "") -> None:
-        self._emit(kind="llm_call", intent=intent, output=output)
+    def record_llm_call(self, intent: str, output: str = "", model: Optional[str] = None,
+                        input_tokens: Optional[int] = None, output_tokens: Optional[int] = None) -> None:
+        self._emit(kind="llm_call", intent=intent, output=output, model=model,
+                   input_tokens=input_tokens, output_tokens=output_tokens)
 
     def record_tool_call(self, tool: str, args: dict, intent: str = "",
                          approved_by: Optional[str] = None) -> None:

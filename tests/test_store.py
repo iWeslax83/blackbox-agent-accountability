@@ -57,6 +57,7 @@ def test_assert_scoped_rejects_unscoped_sql(store):
     lambda s: s.append("", _ev()),
     lambda s: s.add_verdict("", _vd()),
     lambda s: s.sessions(""),
+    lambda s: s.usage(""),
 ])
 def test_every_public_method_requires_org(store, call):
     with pytest.raises(ValueError):
@@ -77,6 +78,47 @@ def test_violation_trend_is_zero_filled_and_counts_only_violations(store):
     assert len(trend) == 7                        # zero-filled for every day in the window
     assert trend[-1]["violations"] == 1            # today: 1 confirmed violation, the non-violation doesn't count
     assert all(d["violations"] == 0 for d in trend[:-1])
+
+def test_append_computes_cost_from_known_model(store):
+    e = store.append("orgA", Event(agent_id="a", session_id="s1", kind="llm_call",
+                                   model="claude-sonnet-5", input_tokens=1000, output_tokens=1000))
+    assert e.cost_usd == pytest.approx(0.003 + 0.015)
+
+def test_append_leaves_cost_none_for_unknown_model(store):
+    e = store.append("orgA", Event(agent_id="a", session_id="s1", kind="llm_call",
+                                   model="some-unknown-model", input_tokens=1000, output_tokens=1000))
+    assert e.cost_usd is None
+
+def test_append_respects_explicit_cost_usd(store):
+    e = store.append("orgA", Event(agent_id="a", session_id="s1", kind="llm_call",
+                                   model="claude-sonnet-5", input_tokens=1000, output_tokens=1000,
+                                   cost_usd=1.23))
+    assert e.cost_usd == 1.23
+
+def test_cost_is_excluded_from_hash_chain():
+    """Token/cost metadata must not affect the digest, so pre-migration chains (which never
+    had these fields) keep verifying after the columns were added."""
+    from teluvane.store import _event_digest
+    base = Event(agent_id="a", session_id="s1", kind="llm_call", ts="2026-01-01T00:00:00+00:00")
+    with_cost = base.model_copy(update={"model": "claude-sonnet-5", "input_tokens": 1000,
+                                        "output_tokens": 1000, "cost_usd": 0.018})
+    assert _event_digest("GENESIS", base) == _event_digest("GENESIS", with_cost)
+
+def test_usage_is_zero_filled_and_sums_tokens_and_cost(store):
+    store.append("orgA", Event(agent_id="a", session_id="s1", kind="llm_call",
+                               model="claude-sonnet-5", input_tokens=1000, output_tokens=1000))
+    usage = store.usage("orgA", days=7)
+    assert len(usage) == 7
+    assert usage[-1]["input_tokens"] == 1000
+    assert usage[-1]["output_tokens"] == 1000
+    assert usage[-1]["cost_usd"] == pytest.approx(0.018)
+    assert all(d["cost_usd"] == 0 for d in usage[:-1])
+
+def test_usage_scoped_to_org(store):
+    store.append("orgA", Event(agent_id="a", session_id="s1", kind="llm_call",
+                               model="claude-sonnet-5", input_tokens=1000, output_tokens=1000))
+    usage_b = store.usage("orgB", days=1)
+    assert usage_b[0]["cost_usd"] == 0
 
 def test_sessions_pagination(store):
     for i in range(5):

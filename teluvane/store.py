@@ -4,6 +4,7 @@ from typing import Optional
 from psycopg.rows import dict_row
 from .schema import Event, Verdict
 from .db import get_pool
+from .cost import compute_cost
 
 def _event_digest(prev_hash: str, e: Event) -> str:
     # org_id is part of the digest so an event is cryptographically bound to its tenant.
@@ -34,11 +35,16 @@ class Store:
     def append(self, org_id: str, e: Event) -> Event:
         sql_last = "SELECT hash FROM events WHERE org_id=%s AND session_id=%s ORDER BY seq DESC LIMIT 1"
         sql_ins = ("INSERT INTO events"
-                   "(org_id,agent_id,session_id,kind,intent,tool,args,output,approved_by,ts,prev_hash,hash)"
-                   " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING seq")
+                   "(org_id,agent_id,session_id,kind,intent,tool,args,output,approved_by,ts,"
+                   "prev_hash,hash,model,input_tokens,output_tokens,cost_usd)"
+                   " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING seq")
         self._assert_scoped(org_id, sql_last)
         self._assert_scoped(org_id, sql_ins)
         e.org_id = org_id
+        # cost_usd isn't part of the hash chain (see _event_digest), so it's safe to fill it
+        # in here from a known model's pricing when the caller supplied tokens but no cost.
+        if e.cost_usd is None:
+            e.cost_usd = compute_cost(e.model, e.input_tokens, e.output_tokens)
         with self.pool.connection() as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(sql_last, (org_id, e.session_id))
@@ -48,7 +54,7 @@ class Store:
                 cur.execute(sql_ins, (
                     org_id, e.agent_id, e.session_id, e.kind, e.intent, e.tool,
                     json.dumps(e.args, ensure_ascii=False), e.output, e.approved_by,
-                    e.ts, e.prev_hash, e.hash))
+                    e.ts, e.prev_hash, e.hash, e.model, e.input_tokens, e.output_tokens, e.cost_usd))
                 e.seq = cur.fetchone()["seq"]
             conn.commit()
         return e
@@ -117,6 +123,26 @@ class Store:
             cur.execute(sql, (days, org_id))
             rows = cur.fetchall()
         return [{"date": r["day"].isoformat(), "violations": r["violations"]} for r in rows]
+
+    def usage(self, org_id: str, days: int = 30) -> list[dict]:
+        """Per-UTC-day token/cost totals for the last `days` days, oldest first, zero-filled.
+        Only llm_call events carry token/cost data; rows without it contribute zero."""
+        days = max(1, min(days, 365))
+        sql = (
+            "SELECT d::date AS day, "
+            "coalesce(sum(e.input_tokens), 0) AS input_tokens, "
+            "coalesce(sum(e.output_tokens), 0) AS output_tokens, "
+            "coalesce(sum(e.cost_usd), 0) AS cost_usd "
+            "FROM generate_series(current_date - (%s - 1) * interval '1 day', current_date, "
+            "interval '1 day') AS d "
+            "LEFT JOIN events e ON e.org_id=%s AND e.kind='llm_call' AND e.ts::date = d::date "
+            "GROUP BY d ORDER BY d")
+        self._assert_scoped(org_id, sql)
+        with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (days, org_id))
+            rows = cur.fetchall()
+        return [{"date": r["day"].isoformat(), "input_tokens": r["input_tokens"],
+                "output_tokens": r["output_tokens"], "cost_usd": float(r["cost_usd"])} for r in rows]
 
     def sessions(self, org_id: str, q: Optional[str] = None,
                 limit: int = 50, offset: int = 0) -> list[dict]:

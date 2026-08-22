@@ -114,6 +114,19 @@ def test_violation_trend_endpoint(client):
     trend = client.get("/stats/violations?days=7", headers=h).json()
     assert len(trend) == 7 and trend[-1]["violations"] >= 1
 
+def test_usage_endpoint(client):
+    org = create_org("Acme", "u1")
+    key = create_api_key(org, "ci")
+    h = {"Authorization": f"Bearer {_jwt('u1')}"}
+    client.post("/events", json={"agent_id": "a", "session_id": "u", "kind": "llm_call",
+                "intent": "summarize", "model": "claude-sonnet-5",
+                "input_tokens": 1000, "output_tokens": 1000},
+                headers={"Authorization": f"Bearer {key}"})
+    usage = client.get("/stats/usage?days=7", headers=h).json()
+    assert len(usage) == 7
+    assert usage[-1]["input_tokens"] == 1000
+    assert usage[-1]["cost_usd"] == pytest.approx(0.018)
+
 def test_policy_framework_selection_changes_which_rules_apply(client):
     org = create_org("Acme", "u1")
     key = create_api_key(org, "ci")

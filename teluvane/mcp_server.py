@@ -38,10 +38,14 @@ def _recorder(session_id: str | None) -> TeluvaneRecorder:
                             base_url=BASE_URL, api_key=API_KEY)
 
 @mcp.tool()
-def record_llm_call(intent: str, output: str = "", session_id: str | None = None) -> str:
+def record_llm_call(intent: str, output: str = "", session_id: str | None = None,
+                    model: str | None = None, input_tokens: int | None = None,
+                    output_tokens: int | None = None) -> str:
     """Record that the agent made an LLM call. `intent` should say why in one sentence,
-    since that's what the tribunal audits against, not the raw prompt/completion."""
-    _recorder(session_id).record_llm_call(intent=intent, output=output)
+    since that's what the tribunal audits against, not the raw prompt/completion. Pass
+    model + input_tokens/output_tokens when known, for cost tracking in /stats/usage."""
+    _recorder(session_id).record_llm_call(intent=intent, output=output, model=model,
+                                          input_tokens=input_tokens, output_tokens=output_tokens)
     return f"recorded llm_call to session {session_id or DEFAULT_SESSION_ID}"
 
 @mcp.tool()

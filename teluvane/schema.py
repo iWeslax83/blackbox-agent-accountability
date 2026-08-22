@@ -19,6 +19,10 @@ class Event(BaseModel):
     args: dict[str, Any] = Field(default_factory=dict)
     output: str = ""
     approved_by: Optional[str] = None  # "human:<id>" | "auto" | None
+    model: Optional[str] = None            # llm_call only: model id, for cost tracking
+    input_tokens: Optional[int] = None     # llm_call only
+    output_tokens: Optional[int] = None    # llm_call only
+    cost_usd: Optional[float] = None       # computed by the store if omitted and model is known
     ts: str = Field(default_factory=utcnow_iso)
     # assigned on persist:
     seq: Optional[int] = None

@@ -114,6 +114,21 @@ single auditable session.
 
 ---
 
+## SDKs
+
+For agents that aren't MCP clients, record events directly against `/events`:
+
+- **Python** — `teluvane.recorder.TeluvaneRecorder` (ships with `pip install -e .`, same package
+  as the API and MCP server).
+- **JS/TS** — `@teluvane/sdk` in [`sdk-js/`](sdk-js/), for Node and browser agents.
+
+Both take an `agent_id`, `session_id`, API key, and record `llm_call` / `tool_call` /
+`tool_result` steps. Pass `model` + input/output token counts on `llm_call` to get cost
+tracking in `GET /stats/usage` (per-day tokens and USD, computed from a built-in pricing
+table for known models; unknown models are recorded with no computed cost).
+
+---
+
 ## Tests
 
 ```bash
